@@ -1,0 +1,21 @@
+start = expression
+
+expression =
+    value binary_op expression
+    / value
+
+value =
+    identifier
+    / literal
+
+identifier =
+    identifier_name identifier_op identifier
+    / identifier_name
+
+identifier_name =
+    '[' name ']'
+
+name = [A-Za-z_][A-Za-z0-9_]*
+literal = '"' [^"]* '"'
+binary_op = '+' / '&'
+identifier_op = '!' / '.' 
