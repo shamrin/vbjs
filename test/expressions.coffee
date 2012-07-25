@@ -1,5 +1,4 @@
 # Other tests to add (from nwind.mdb):
-#    '[FirstName] & " " & [LastName]'
 #    '[Orders Subform].[Form]![OrderSubtotal]'
 #    '[Subtotal]+[Freight]'
 #    'Sum([ExtendedPrice])'
@@ -18,4 +17,6 @@ suite 'Expressions', ->
     setup ->
         # nothing here
     test 'basic', ->
-        eq 'Nancy Davolio', run '[FirstName]&" "&[LastName]'
+        eq 'Nancy, Davolio', run '[FirstName]&", "&[LastName]'
+    test 'basic whitespace', ->
+        eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]'

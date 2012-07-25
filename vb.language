@@ -16,10 +16,14 @@ identifier
     = identifier_name identifier_op identifier
     / identifier_name
 
-identifier_name = '[' name ']'
+
+__ = [ \t]*
+
+identifier_name = '[' name ']' __
 
 name = [A-Za-z_][A-Za-z0-9_]*
-literal = '"' [^"]* '"'
-concat_op = '&'
-plus_op = '+'
-identifier_op = '!' / '.' 
+literal = '"' literal_text '"' __
+literal_text = [^"]*
+concat_op = '&' __
+plus_op = '+' __
+identifier_op = '!' / '.'

@@ -31,14 +31,16 @@ parse = (expr) ->
         traversesTextNodes: false
         exitedNode: (node) ->
             node.value =
-                if node.children.length == 1
-                    node.children[0].value
-                else switch node.name
-                    when 'identifier'
+                switch node.name
+                    when 'source', '#document' # language.js nodes
+                        node.children[0].value
+                    when 'start', 'expression', 'value', 'identifier'
                         node.children[0].value
                     when 'literal'
                         type: 'Literal'
-                        value: node.children[1]
+                        value: node.children[1].value
+                    when 'literal_text'
+                        node.innerText()
                     when 'identifier_name'
                         type: 'MemberExpression'
                         computed: yes
