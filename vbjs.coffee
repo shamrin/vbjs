@@ -1,6 +1,6 @@
 parser = require "./vb.js"
 
-evaluate = (expr, row) ->
+exports.evaluate = (expr, row) ->
     row.FirstName
 
 parse = (expr) ->
@@ -27,8 +27,6 @@ parse = (expr) ->
         exitedNode: (node) ->
             if node.name is 'start'
                 console.log node.toString()
-
-exports = {evaluate}
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 parse process.argv[2]
