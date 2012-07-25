@@ -29,42 +29,41 @@ parse = (expr) ->
 
     tree.traverse
         traversesTextNodes: false
-        exitedNode: (node) ->
-            node.value =
-                switch node.name
-                    when 'source', '#document' # language.js nodes
-                        node.children[0].value
-                    when 'start', 'expression', 'value', 'identifier'
-                        node.children[0].value
-                    when 'literal'
+        exitedNode: (n) ->
+            n.value = switch n.name
+                when 'source', '#document' # language.js nodes
+                    n.children[0].value
+                when 'start', 'expression', 'value', 'identifier'
+                    n.children[0].value
+                when 'literal'
+                    type: 'Literal'
+                    value: n.children[1].value
+                when 'literal_text'
+                    n.innerText()
+                when 'identifier_name'
+                    type: 'MemberExpression'
+                    computed: yes
+                    object:
+                        type: 'Identifier'
+                        name: 'row'
+                    property:
                         type: 'Literal'
-                        value: node.children[1].value
-                    when 'literal_text'
-                        node.innerText()
-                    when 'identifier_name'
-                        type: 'MemberExpression'
-                        computed: yes
-                        object:
-                            type: 'Identifier'
-                            name: 'row'
-                        property:
-                            type: 'Literal'
-                            value: node.children[1].value
-                    when 'name'
-                        node.innerText()
-                    when 'binary_expression' 
-                        op = node.children[1].name
-                        [a, b] = [node.children[0].value, node.children[2].value]
-                        if op is 'concat_op'
-                            if a.type is 'Literal' and typeof a.value is 'string'
-                                plus a, b
-                            else
-                                # force conversion to string
-                                plus {type: 'Literal', value: ''}, plus a, b
-                        else if op is 'plus_op'
+                        value: n.children[1].value
+                when 'name'
+                    n.innerText()
+                when 'binary_expression' 
+                    op = n.children[1].name
+                    [a, b] = [n.children[0].value, n.children[2].value]
+                    if op is 'concat_op'
+                        if a.type is 'Literal' and typeof a.value is 'string'
                             plus a, b
+                        else
+                            # force conversion to string
+                            plus {type: 'Literal', value: ''}, plus a, b
+                    else if op is 'plus_op'
+                        plus a, b
 
-            #if node.name is 'start' then console.log node.toString()
+            #if n.name is 'start' then console.log n.toString()
 
     tree.value
 
