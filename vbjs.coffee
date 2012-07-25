@@ -1,7 +1,8 @@
 parser = require "./vb.js"
 
 exports.evaluate = (expr, row) ->
-    row.FirstName
+    js = generate parse expr
+    eval js
 
 parse = (expr) ->
     tree = parser.parse expr
@@ -27,6 +28,9 @@ parse = (expr) ->
         exitedNode: (node) ->
             if node.name is 'start'
                 console.log node.toString()
+
+generate = (tree) ->
+    '"" + 123 + 542'
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 parse process.argv[2]

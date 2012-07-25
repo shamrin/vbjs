@@ -10,14 +10,16 @@
 #    '[TotalQ1]+[TotalQ2]+[TotalQ3]+[TotalQ4]'
 #]
 
-{strictEqual: eq} = require 'assert'
+{strictEqual} = require 'assert'
 {evaluate} = require '../vbjs'
 
-ev = (expr) ->
+run = (expr) ->
     evaluate expr, {FirstName: 'Nancy', LastName: 'Davolio'}
+
+eq = (expected, actual, message) -> strictEqual actual, expected, message
 
 suite 'Expressions', ->
     setup ->
         # nothing here
     test 'basic', ->
-        eq 'Nancy Butley', ev '[FirstName]&" "&[LastName]'
+        eq 'Nancy Butley', run '[FirstName]&" "&[LastName]'
