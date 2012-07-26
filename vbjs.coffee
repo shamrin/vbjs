@@ -44,14 +44,13 @@ parse = (expr) ->
                     result =
                         type: 'Identifier'
                         name: 'Me'
-                    id_op = '.'
-                    for id_name, i in n.children by 2
-                        result = switch id_op
+                    for {value}, i in n.children by 2
+                        result = switch op ? '.'
                             when '.' # A.B => A[B]
                                 type: 'MemberExpression'
                                 computed: yes
                                 object: result
-                                property: id_name.value
+                                property: value
                             when '!' # A!B => A.__default(B)
                                 type: 'CallExpression'
                                 callee: 
@@ -61,8 +60,8 @@ parse = (expr) ->
                                     property:
                                         type: 'Identifier'
                                         name: '__default'
-                                'arguments': [ id_name.value ]
-                        id_op = n.children[i+1]?.value
+                                'arguments': [ value ]
+                        op = n.children[i+1]?.value
                     result
                 when 'identifier_op'
                     n.innerText()
