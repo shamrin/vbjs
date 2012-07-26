@@ -1,5 +1,4 @@
 # Other tests to add (from nwind.mdb):
-#    '[Orders Subform].[Form]![OrderSubtotal]'
 #    '[Subtotal]+[Freight]'
 #    'Sum([ExtendedPrice])'
 #    '[Quarterly Orders Subform]![Total]'
@@ -22,11 +21,9 @@ suite 'Expressions -', ->
     test 'basic whitespace', ->
         eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]',
                             FirstName: 'Nancy', LastName: 'Davolio'
-    test 'identifier operators', ->
-        eq 123, run '[SomeSubform].[Form]![Subtotal]',
-                    SomeSubform:
-                        Form:
-                            __default: (v) -> {Subtotal: 123}[v]
     test 'identifier with whitespace', ->
         eq 'Nancy', run '[First name]', 'First name': 'Nancy'
-
+    test 'identifier operators', ->
+        eq 123, run '[Some Subform].[Form]![Subtotal]',
+                    'Some Subform':
+                        Form: __default: (v) -> {Subtotal: 123}[v]
