@@ -13,7 +13,7 @@
 run = (expr, Me) -> evaluate expr, Me
 eq = (expected, actual, message) -> strictEqual actual, expected, message
 
-suite 'Expressions', ->
+suite 'Expressions -', ->
     setup ->
         # nothing here
     test 'basic', ->
