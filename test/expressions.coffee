@@ -28,10 +28,12 @@ suite 'Expressions -', ->
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
-        eq 30, run 'Sum([ExtendedPrice])', {}, {ExtendedPrice: [4, 10, 16]},
+        eq 30, run 'Abs([Field])', {Field: -30}, {},
+                   Abs: (Me, Us, expr) -> Math.abs(expr)
+    test 'lazy functions', ->
+        eq 40, run 'Sum([ExtendedPrice])', {}, {ExtendedPrice: [10, 10, 20]},
                    Sum: (Me, Us, expr) ->
                        field = {'[ExtendedPrice]': 'ExtendedPrice'}[expr]
-                       vals = Us[field]
                        sum = 0
-                       for val in vals then sum += val
+                       for val in Us[field] then sum += val
                        sum
