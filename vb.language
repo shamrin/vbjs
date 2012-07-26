@@ -17,7 +17,7 @@ __ = [ \t]*
 
 identifier = '[' name ']' __
 
-name = [A-Za-z_][A-Za-z0-9_]*
+name = [A-Za-z_][A-Za-z0-9_ ]*
 literal = '"' literal_text '"' __
 literal_text = [^"]*
 concat_op = '&' __

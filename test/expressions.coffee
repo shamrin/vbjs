@@ -27,4 +27,6 @@ suite 'Expressions -', ->
                     SomeSubform:
                         Form:
                             __default: (v) -> {Subtotal: 123}[v]
+    test 'identifier with whitespace', ->
+        eq 'Nancy', run '[First name]', 'First name': 'Nancy'
 
