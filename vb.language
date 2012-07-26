@@ -10,6 +10,7 @@ add_expr
 
 call_expr
     = lazy_call_expr
+    / name left_bracket (expression ( comma expression )* )? right_bracket
     / value
 
 lazy_call_expr
@@ -31,6 +32,7 @@ __ = [ \t]*
 identifier = '[' name_in_brackets ']' __
 
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
+name = [A-Za-z_][A-Za-z0-9_]* __
 lazy_name = 'Sum'
 literal = '"' literal_text '"' __
 literal_text = [^"]*

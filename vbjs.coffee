@@ -77,7 +77,7 @@ parse = (expr) ->
                 when 'identifier'
                     type: 'Literal'
                     value: n.children[1].value
-                when 'name_in_brackets', 'lazy_name'
+                when 'name', 'name_in_brackets', 'lazy_name'
                     n.innerText()
                 when 'concat_expr' 
                     result = if n.children[1]? # force string
@@ -89,24 +89,17 @@ parse = (expr) ->
                     for {value}, i in n.children by 2
                         result = if result? then plus result, value else value
                     result
-
+                when 'call_expr'
+                    if n.children.length > 1
+                        [{value: fn}, l, params..., r] = n.children
+                        call(fn, for {value} in params by 2 then value)
+                    else
+                        n.children[0].value
                 when 'lazy_call_expr'
                     [{value: func_name}, l, params..., r] = n.children
-                    type: 'CallExpression'
-                    callee:
-                        type: 'MemberExpression'
-                        computed: 'true'
-                        object:
-                            type: 'Identifier'
-                            name: 'functions'
-                        property:
-                            type: 'Literal'
-                            value: func_name
-                    'arguments': [{type: 'Identifier', name: 'Me'},
-                                  {type: 'Identifier', name: 'Us'}]\
-                                 .concat(for {value} in params by 2
-                                             type: 'Literal'
-                                             value: value)
+                    call(func_name, for {value} in params by 2
+                                                  type: 'Literal'
+                                                  value: value)
                 when 'lazy_value'
                     n.innerText()
 
@@ -120,6 +113,21 @@ plus = (left, right) ->
     operator: '+'
     left: left
     right: right
+
+# generate tree for this code: functions[`func_name`](Me, Us, `args`...)
+call = (func_name, args) ->
+    type: 'CallExpression'
+    callee:
+        type: 'MemberExpression'
+        computed: 'true'
+        object:
+            type: 'Identifier'
+            name: 'functions'
+        property:
+            type: 'Literal'
+            value: func_name
+    'arguments': [{type: 'Identifier', name: 'Me'},
+                  {type: 'Identifier', name: 'Us'}].concat args
 
 # compile to JavaScript
 compile = (tree) ->
