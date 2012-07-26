@@ -30,7 +30,8 @@ suite 'Expressions -', ->
     test 'functions', ->
         eq 30, run 'Sum([ExtendedPrice])', {}, {ExtendedPrice: [4, 10, 16]},
                    Sum: (Me, Us, expr) ->
-                       a = Us[{'[ExtendedPrice]': 'ExtendedPrice'}[expr]]
-                       s = 0
-                       for e in a then s += e
-                       s
+                       field = {'[ExtendedPrice]': 'ExtendedPrice'}[expr]
+                       vals = Us[field]
+                       sum = 0
+                       for val in vals then sum += val
+                       sum
