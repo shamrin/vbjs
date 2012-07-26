@@ -51,15 +51,16 @@ parse = (expr) ->
                         value: n.children[1].value
                 when 'name'
                     n.innerText()
-                when 'binary_expression' 
+                when 'add_expression' 
                     op = n.children[1].name
-                    [a, b] = [n.children[0].value, n.children[2].value]
+
                     if op is 'concat_op'
-                        if a.type is 'Literal' and typeof a.value is 'string'
-                            plus a, b
-                        else
-                            # force conversion to string
-                            plus {type: 'Literal', value: ''}, plus a, b
+                        # force conversion to string
+                        result = plus {type: 'Literal', value: ''}, \
+                                      n.children[0].value
+                        for c in n.children[1..] when c.name is 'value'
+                            result = plus result, c.value
+                        result
                     else if op is 'plus_op'
                         plus a, b
 
@@ -77,6 +78,7 @@ plus = (left, right) ->
 compile = (tree) ->
     #pprint tree
     code = escodegen.generate tree
+    #console.log 'CODE', code
     new Function 'row', "return #{code};"
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
