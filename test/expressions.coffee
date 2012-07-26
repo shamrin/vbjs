@@ -23,10 +23,6 @@ suite 'Expressions', ->
         eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]',
                             FirstName: 'Nancy', LastName: 'Davolio'
     test 'identifier operators', ->
-        # bang ! operator: [A]![B] ==> Me['A'].__default('B'), links:
-        #   * http://www.cpearson.com/excel/DefaultMember.aspx
-        #   * http://stackoverflow.com/questions/4804947
-        #   * http://stackoverflow.com/questions/2923957
         eq 123, run '[SomeSubform].[Form]![Subtotal]',
                     SomeSubform:
                         Form:

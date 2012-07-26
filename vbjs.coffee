@@ -51,7 +51,11 @@ parse = (expr) ->
                                 computed: yes
                                 object: result
                                 property: value
-                            when '!' # A!B => A.__default(B)
+                            when '!'
+                                # bang op: A!B => A.__default(B), links:
+                                # * http://stackoverflow.com/q/4804947
+                                # * http://stackoverflow.com/q/2923957
+                                # * http://www.cpearson.com/excel/DefaultMember.aspx
                                 type: 'CallExpression'
                                 callee: 
                                     type: 'MemberExpression'
