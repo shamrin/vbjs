@@ -5,17 +5,15 @@ expression
     / value
 
 add_expression 
-    = value (concat_op value)*
-    / value (plus_op value)*
+    = value (concat_op value)+
+    / value (plus_op value)+
 
 value
     = identifier
     / literal
 
 identifier
-    = identifier_name identifier_op identifier
-    / identifier_name
-
+    = identifier_name (identifier_op identifier_name)*
 
 __ = [ \t]*
 

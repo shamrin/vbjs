@@ -33,22 +33,42 @@ parse = (expr) ->
             n.value = switch n.name
                 when 'source', '#document' # language.js nodes
                     n.children[0].value
-                when 'start', 'expression', 'value', 'identifier'
+                when 'start', 'expression', 'value'
                     n.children[0].value
                 when 'literal'
                     type: 'Literal'
                     value: n.children[1].value
                 when 'literal_text'
                     n.innerText()
-                when 'identifier_name'
-                    type: 'MemberExpression'
-                    computed: yes
-                    object:
+                when 'identifier'
+                    result =
                         type: 'Identifier'
                         name: 'Me'
-                    property:
-                        type: 'Literal'
-                        value: n.children[1].value
+                    id_op = '.'
+                    for id_name, i in n.children by 2
+                        result = switch id_op
+                            when '.' # A.B => A[B]
+                                type: 'MemberExpression'
+                                computed: yes
+                                object: result
+                                property: id_name.value
+                            when '!' # A!B => A.__default(B)
+                                type: 'CallExpression'
+                                callee: 
+                                    type: 'MemberExpression'
+                                    computed: no
+                                    object: result
+                                    property:
+                                        type: 'Identifier'
+                                        name: '__default'
+                                'arguments': [ id_name.value ]
+                        id_op = n.children[i+1]?.value
+                    result
+                when 'identifier_op'
+                    n.innerText()
+                when 'identifier_name'
+                    type: 'Literal'
+                    value: n.children[1].value
                 when 'name'
                     n.innerText()
                 when 'add_expression' 
@@ -76,6 +96,7 @@ plus = (left, right) ->
 
 # compile to JavaScript
 compile = (tree) ->
+    #console.log 'TREE:'
     #pprint tree
     code = escodegen.generate tree
     #console.log 'CODE', code
