@@ -11,15 +11,15 @@
 run = (expr, Me) -> evaluate expr, Me
 eq = (expected, actual, message) -> strictEqual actual, expected, message
 
+nancy = FirstName: 'Nancy', LastName: 'Davolio'
+
 suite 'Expressions -', ->
     setup ->
         # nothing here
     test 'basic', ->
-        eq 'Nancy, Davolio', run '[FirstName]&", "&[LastName]',
-                             FirstName: 'Nancy', LastName: 'Davolio'
+        eq 'Nancy, Davolio', run '[FirstName]&", "&[LastName]', nancy
     test 'basic whitespace', ->
-        eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]',
-                            FirstName: 'Nancy', LastName: 'Davolio'
+        eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]', nancy
     test 'identifier with whitespace', ->
         eq 'Nancy', run '[First name]', 'First name': 'Nancy'
     test 'identifier operators', ->
@@ -27,5 +27,4 @@ suite 'Expressions -', ->
                     'Some Subform':
                         Form: __default: (v) -> {Subtotal: 123}[v]
     test 'addition', ->
-        eq 666, run '[Subtotal]+[Freight]',
-                    Subtotal: 123, Freight: 543
+        eq 666, run '[Subtotal]+[Freight]', Subtotal: 123, Freight: 543
