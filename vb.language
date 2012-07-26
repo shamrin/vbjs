@@ -1,4 +1,4 @@
-start = expression
+start = expression !.
 
 expression = add_expr
 
