@@ -40,7 +40,7 @@ parse = (expr) ->
                     value: n.children[1].value
                 when 'literal_text'
                     n.innerText()
-                when 'identifier'
+                when 'identifier_expr'
                     result =
                         type: 'Identifier'
                         name: 'Me'
@@ -69,12 +69,12 @@ parse = (expr) ->
                     result
                 when 'identifier_op'
                     n.innerText()
-                when 'identifier_name'
+                when 'identifier'
                     type: 'Literal'
                     value: n.children[1].value
                 when 'name'
                     n.innerText()
-                when 'add_expression' 
+                when 'add_expr' 
                     result = if n.children[1]?.name is 'concat_op'
                                  type: 'Literal', value: '' # force string
                     for {value}, i in n.children by 2

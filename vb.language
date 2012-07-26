@@ -1,21 +1,21 @@
 start = expression
 
-expression = add_expression
+expression = add_expr
 
-add_expression 
+add_expr 
     = value (concat_op value)*
     / value (plus_op value)*
 
 value
-    = identifier
+    = identifier_expr
     / literal
 
-identifier
-    = identifier_name (identifier_op identifier_name)*
+identifier_expr
+    = identifier (identifier_op identifier)*
 
 __ = [ \t]*
 
-identifier_name = '[' name ']' __
+identifier = '[' name ']' __
 
 name = [A-Za-z_][A-Za-z0-9_]*
 literal = '"' literal_text '"' __
