@@ -6,8 +6,19 @@ concat_expr
     = add_expr (concat_op add_expr)*
 
 add_expr
-    = value (plus_op value)*
+    = call_expr (plus_op call_expr)*
 
+call_expr
+    = lazy_call_expr
+    / value
+
+lazy_call_expr
+    = lazy_name left_bracket (lazy_value (comma lazy_value)* )? right_bracket
+
+lazy_value
+    = identifier
+    / literal
+    
 value
     = identifier_expr
     / literal
@@ -17,11 +28,15 @@ identifier_expr
 
 __ = [ \t]*
 
-identifier = '[' name ']' __
+identifier = '[' name_in_brackets ']' __
 
-name = [A-Za-z_][A-Za-z0-9_ ]*
+name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
+lazy_name = 'Sum'
 literal = '"' literal_text '"' __
 literal_text = [^"]*
 concat_op = '&' __
 plus_op = '+' __
+left_bracket = '(' __
+right_bracket = ')' __
+comma = ',' __
 identifier_op = '!' / '.'

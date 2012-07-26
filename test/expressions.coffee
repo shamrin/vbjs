@@ -1,5 +1,4 @@
 # Other tests to add (from nwind.mdb):
-#    'Sum([ExtendedPrice])'
 #    '[Quarterly Orders Subform]![Total]'
 #    '"Grand Total for " & [Forms]![Quarterly Orders]![Quarterly Orders Subform].[Form]![Year]'
 #    'NZ(Sum([Qtr 1]))'
@@ -8,7 +7,7 @@
 {evaluate} = require '../vbjs'
 {strictEqual} = require 'assert'
 
-run = (expr, Me) -> evaluate expr, Me
+run = (expr, Me, Us, functions) -> evaluate expr, Me, Us, functions
 eq = (expected, actual, message) -> strictEqual actual, expected, message
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
@@ -28,3 +27,10 @@ suite 'Expressions -', ->
                        Form: __default: (v) -> {Subtotal: 10}[v]
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
+    test 'functions', ->
+        eq 30, run 'Sum([ExtendedPrice])', {}, {ExtendedPrice: [4, 10, 16]},
+                   Sum: (Me, Us, expr) ->
+                       a = Us[{'[ExtendedPrice]': 'ExtendedPrice'}[expr]]
+                       s = 0
+                       for e in a then s += e
+                       s

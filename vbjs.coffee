@@ -1,11 +1,11 @@
 parser = require "./vb.js"
 escodegen = require "escodegen"
 
-exports.evaluate = (expr, Me) ->
+exports.evaluate = (expr, Me, Us, functions) ->
     tree = parse expr
     if tree?
         js = compile tree
-        js Me
+        js Me, Us, functions
     else
         'Error parsing ' + expr
 
@@ -77,7 +77,7 @@ parse = (expr) ->
                 when 'identifier'
                     type: 'Literal'
                     value: n.children[1].value
-                when 'name'
+                when 'name_in_brackets', 'lazy_name'
                     n.innerText()
                 when 'concat_expr' 
                     result = if n.children[1]? # force string
@@ -89,6 +89,26 @@ parse = (expr) ->
                     for {value}, i in n.children by 2
                         result = if result? then plus result, value else value
                     result
+
+                when 'lazy_call_expr'
+                    [{value: func_name}, l, params..., r] = n.children
+                    type: 'CallExpression'
+                    callee:
+                        type: 'MemberExpression'
+                        computed: 'true'
+                        object:
+                            type: 'Identifier'
+                            name: 'functions'
+                        property:
+                            type: 'Literal'
+                            value: func_name
+                    'arguments': [{type: 'Identifier', name: 'Me'},
+                                  {type: 'Identifier', name: 'Us'}]\
+                                 .concat(for {value} in params by 2
+                                             type: 'Literal'
+                                             value: value)
+                when 'lazy_value'
+                    n.innerText()
 
             #if n.name is 'start' then console.log n.toString()
 
@@ -107,7 +127,7 @@ compile = (tree) ->
     #pprint tree
     code = escodegen.generate tree
     #console.log 'CODE', code
-    new Function 'Me', "return #{code};"
+    new Function 'Me', 'Us', 'functions', "return #{code};"
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 #parse process.argv[2]
