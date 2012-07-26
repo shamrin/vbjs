@@ -1,8 +1,8 @@
 parser = require "./vb.js"
 escodegen = require "escodegen"
 
-exports.evaluate = (expr, row) ->
-    (compile parse expr)(row)
+exports.evaluate = (expr, Me) ->
+    (compile parse expr)(Me)
 
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
@@ -45,7 +45,7 @@ parse = (expr) ->
                     computed: yes
                     object:
                         type: 'Identifier'
-                        name: 'row'
+                        name: 'Me'
                     property:
                         type: 'Literal'
                         value: n.children[1].value
@@ -79,7 +79,7 @@ compile = (tree) ->
     #pprint tree
     code = escodegen.generate tree
     #console.log 'CODE', code
-    new Function 'row', "return #{code};"
+    new Function 'Me', "return #{code};"
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 #parse process.argv[2]

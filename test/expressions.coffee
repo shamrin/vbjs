@@ -10,13 +10,15 @@
 {evaluate} = require '../vbjs'
 {strictEqual} = require 'assert'
 
-run = (expr) -> evaluate expr, {FirstName: 'Nancy', LastName: 'Davolio'}
+run = (expr, Me) -> evaluate expr, Me
 eq = (expected, actual, message) -> strictEqual actual, expected, message
 
 suite 'Expressions', ->
     setup ->
         # nothing here
     test 'basic', ->
-        eq 'Nancy, Davolio', run '[FirstName]&", "&[LastName]'
+        eq 'Nancy, Davolio', run '[FirstName]&", "&[LastName]',
+                             FirstName: 'Nancy', LastName: 'Davolio'
     test 'basic whitespace', ->
-        eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]'
+        eq 'Nancy Davolio', run '[FirstName] & " " & [LastName]',
+                            FirstName: 'Nancy', LastName: 'Davolio'
