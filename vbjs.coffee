@@ -2,7 +2,12 @@ parser = require "./vb.js"
 escodegen = require "escodegen"
 
 exports.evaluate = (expr, Me) ->
-    (compile parse expr)(Me)
+    tree = parse expr
+    if tree?
+        js = compile tree
+        js Me
+    else
+        'Error parsing ' + expr
 
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
@@ -31,8 +36,8 @@ parse = (expr) ->
         traversesTextNodes: false
         exitedNode: (n) ->
             n.value = switch n.name
-                when 'source', '#document' # language.js nodes
-                    n.children[0].value
+                when '#document', 'source' # language.js nodes
+                    n.children?[0]?.value
                 when 'start', 'expression', 'value'
                     n.children[0].value
                 when 'literal'
