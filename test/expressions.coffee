@@ -8,6 +8,13 @@ run = (expr, Me, Us, functions) -> evaluate expr, Me, Us, functions
 eq = (expected, actual, message) -> strictEqual actual, expected, message
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
+fns =
+    Abs: (Me, Us, expr) -> Math.abs(expr)
+    Sum: (Me, Us, expr) ->
+        field = {'[Field]': 'Field'}[expr]
+        sum = 0
+        for val in Us[field] then sum += val
+        sum
 
 suite 'Expressions -', ->
     setup ->
@@ -25,14 +32,10 @@ suite 'Expressions -', ->
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
-        eq 30, run 'Abs([Field])', {Field: -30}, {},
-                   Abs: (Me, Us, expr) -> Math.abs(expr)
+        eq 30, run 'Abs([Field])', {Field: -30}, {}, fns
     test 'lazy functions', ->
-        eq 40, run 'Sum([ExtendedPrice])', {}, {ExtendedPrice: [10, 10, 20]},
-                   Sum: (Me, Us, expr) ->
-                       field = {'[ExtendedPrice]': 'ExtendedPrice'}[expr]
-                       sum = 0
-                       for val in Us[field] then sum += val
-                       sum
+        eq 40, run 'Sum([Field])', {}, {Field: [10, 10, 20]}, fns
     test 'long addition', ->
         eq 50, run '[X] + [Y] + [Z]', X: 10, Y: 20, Z: 20
+    test 'nested calls', ->
+        eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
