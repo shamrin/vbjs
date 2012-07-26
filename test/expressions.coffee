@@ -1,8 +1,5 @@
 # Other tests to add (from nwind.mdb):
-#    '[Quarterly Orders Subform]![Total]'
-#    '"Grand Total for " & [Forms]![Quarterly Orders]![Quarterly Orders Subform].[Form]![Year]'
 #    'NZ(Sum([Qtr 1]))'
-#    '[TotalQ1]+[TotalQ2]+[TotalQ3]+[TotalQ4]'
 
 {evaluate} = require '../vbjs'
 {strictEqual} = require 'assert'
@@ -22,9 +19,9 @@ suite 'Expressions -', ->
     test 'identifier with whitespace', ->
         eq 'Nancy', run '[First name]', 'First name': 'Nancy'
     test 'identifier operators', ->
-        eq 10, run '[Some Subform].[Form]![Subtotal]',
-                   'Some Subform':
-                       Form: __default: (v) -> {Subtotal: 10}[v]
+        eq 'Total: 10', run '"Total: " & [Some Subform].[Form]![Subtotal]',
+                        'Some Subform':
+                            Form: __default: (v) -> {Subtotal: 10}[v]
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
@@ -37,3 +34,5 @@ suite 'Expressions -', ->
                        sum = 0
                        for val in Us[field] then sum += val
                        sum
+    test 'long addition', ->
+        eq 50, run '[X] + [Y] + [Z]', X: 10, Y: 20, Z: 20
