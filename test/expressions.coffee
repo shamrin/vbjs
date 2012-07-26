@@ -1,5 +1,4 @@
 # Other tests to add (from nwind.mdb):
-#    '[Subtotal]+[Freight]'
 #    'Sum([ExtendedPrice])'
 #    '[Quarterly Orders Subform]![Total]'
 #    '"Grand Total for " & [Forms]![Quarterly Orders]![Quarterly Orders Subform].[Form]![Year]'
@@ -27,3 +26,6 @@ suite 'Expressions -', ->
         eq 123, run '[Some Subform].[Form]![Subtotal]',
                     'Some Subform':
                         Form: __default: (v) -> {Subtotal: 123}[v]
+    test 'addition', ->
+        eq 666, run '[Subtotal]+[Freight]',
+                    Subtotal: 123, Freight: 543

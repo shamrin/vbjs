@@ -79,15 +79,20 @@ parse = (expr) ->
                     value: n.children[1].value
                 when 'name'
                     n.innerText()
-                when 'add_expr' 
-                    result = if n.children[1]?.name is 'concat_op'
-                                 type: 'Literal', value: '' # force string
+                when 'concat_expr' 
+                    result = if n.children[1]? # force string
+                                 type: 'Literal', value: ''
+                    for {value}, i in n.children by 2
+                        result = if result? then plus result, value else value
+                    result
+                when 'add_expr'
                     for {value}, i in n.children by 2
                         result = if result? then plus result, value else value
                     result
 
             #if n.name is 'start' then console.log n.toString()
 
+    #pprint tree
     tree.value
 
 plus = (left, right) ->
