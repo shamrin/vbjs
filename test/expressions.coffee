@@ -23,8 +23,8 @@ suite 'Expressions -', ->
     test 'identifier with whitespace', ->
         eq 'Nancy', run '[First name]', 'First name': 'Nancy'
     test 'identifier operators', ->
-        eq 123, run '[Some Subform].[Form]![Subtotal]',
-                    'Some Subform':
-                        Form: __default: (v) -> {Subtotal: 123}[v]
+        eq 10, run '[Some Subform].[Form]![Subtotal]',
+                   'Some Subform':
+                       Form: __default: (v) -> {Subtotal: 10}[v]
     test 'addition', ->
-        eq 666, run '[Subtotal]+[Freight]', Subtotal: 123, Freight: 543
+        eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
