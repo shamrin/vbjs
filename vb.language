@@ -1,12 +1,10 @@
 start = expression
 
-expression
-    = add_expression
-    / value
+expression = add_expression
 
 add_expression 
-    = value (concat_op value)+
-    / value (plus_op value)+
+    = value (concat_op value)*
+    / value (plus_op value)*
 
 value
     = identifier

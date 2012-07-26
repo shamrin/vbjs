@@ -75,17 +75,11 @@ parse = (expr) ->
                 when 'name'
                     n.innerText()
                 when 'add_expression' 
-                    op = n.children[1].name
-
-                    if op is 'concat_op'
-                        # force conversion to string
-                        result = plus {type: 'Literal', value: ''}, \
-                                      n.children[0].value
-                        for c in n.children[1..] when c.name is 'value'
-                            result = plus result, c.value
-                        result
-                    else if op is 'plus_op'
-                        plus a, b
+                    result = if n.children[1]?.name is 'concat_op'
+                                 type: 'Literal', value: '' # force string
+                    for {value}, i in n.children by 2
+                        result = if result? then plus result, value else value
+                    result
 
             #if n.name is 'start' then console.log n.toString()
 
