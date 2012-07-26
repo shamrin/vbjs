@@ -108,13 +108,14 @@ parse = (expr) ->
     #pprint tree
     tree.value
 
+# `left` + `right`
 plus = (left, right) ->
     type: 'BinaryExpression'
     operator: '+'
     left: left
     right: right
 
-# generate tree for this code: functions[`func_name`](Me, Us, `args`...)
+# functions[`func_name`](Me, Us, `args`...)
 call = (func_name, args) ->
     type: 'CallExpression'
     callee:
