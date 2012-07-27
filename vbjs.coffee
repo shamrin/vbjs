@@ -124,7 +124,7 @@ exports.evaluate = (expr, me, us, fns) ->
         fn = (name) ->
         js = compile tree
                  unless fns[name]?
-                     throw new VBRuntimeError "Unknown function #{fn}"
+                     throw new VBRuntimeError "VB function '#{name}' not found"
                  (args...) -> fns[name](args...)
         js me, us, fn
     else
