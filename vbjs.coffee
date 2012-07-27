@@ -37,9 +37,7 @@ parse = (expr) ->
                 when 'literal_text'
                     n.innerText()
                 when 'identifier_expr'
-                    result =
-                        type: 'Identifier'
-                        name: 'Me'
+                    result = identifier 'Me'
                     for {value}, i in n.children by 2
                         result = switch op ? '.'
                             when '.' # A.B => A[B]
@@ -57,9 +55,7 @@ parse = (expr) ->
                                     type: 'MemberExpression'
                                     computed: no
                                     object: result
-                                    property:
-                                        type: 'Identifier'
-                                        name: '__default'
+                                    property: identifier '__default'
                                 'arguments': [ value ]
                         op = n.children[i+1]?.value
                     result
@@ -108,16 +104,12 @@ call = (func_name, args) ->
     callee:
         type: 'MemberExpression'
         computed: no
-        object:
-            type: 'Identifier'
-            name: 'functions'
-        property: 
-            type: 'Identifier'
-            name: func_name
-    'arguments': [{type: 'Identifier', name: 'Me'},
-                  {type: 'Identifier', name: 'Us'}].concat args
+        object: identifier 'functions'
+        property: identifier func_name
+    'arguments': [identifier('Me'), identifier('Us')].concat args
 
 literal = (value) -> type: 'Literal', value: value
+identifier = (name) -> type: 'Identifier', name: name
 
 # compile to JavaScript
 compile = (tree) ->
