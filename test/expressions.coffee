@@ -4,7 +4,7 @@
 {evaluate, VBRuntimeError} = require '../vbjs'
 assert = require 'assert'
 
-run = (expr, me, us, fns) -> evaluate expr, me, us, fns
+run = (expr, me={}, us={}, fns={}) -> evaluate expr, me, us, fns
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
@@ -40,4 +40,4 @@ suite 'Expressions -', ->
     test 'nested calls', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
     test 'unknown function error' , ->
-        assert.throws (-> run 'Foo([F])', {F: 123}, {}, fns), VBRuntimeError
+        assert.throws (-> run 'Foo([F])', {F: 123}), VBRuntimeError
