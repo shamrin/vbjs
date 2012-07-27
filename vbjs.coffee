@@ -24,6 +24,8 @@ parse = (expr) ->
 
         return string
 
+    used_fns = []
+
     tree.traverse
         traversesTextNodes: false
         exitedNode: (n) ->
@@ -77,11 +79,13 @@ parse = (expr) ->
                 when 'call_expr'
                     if n.children.length > 1
                         [{value: fn}, l, params..., r] = n.children
+                        used_fns.push fn
                         call(fn, for {value} in params by 2 then value)
                     else
                         n.children[0].value
                 when 'lazy_call_expr'
                     [{value: fn}, l, params..., r] = n.children
+                    used_fns.push fn
                     call(fn, for {value} in params by 2 then literal value)
                 when 'lazy_value'
                     n.innerText()
@@ -89,7 +93,7 @@ parse = (expr) ->
             #if n.name is 'start' then console.log n.toString()
 
     #pprint tree
-    tree.value
+    [tree.value, used_fns]
 
 # `left` + `right`
 plus = (left, right) ->
@@ -112,20 +116,31 @@ literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
 
 # compile to JavaScript
-compile = (tree) ->
+compile = (tree, used_fns) ->
     #console.log 'TREE:'
     #pprint tree
-    code = escodegen.generate tree
-    #console.log 'CODE', code
-    new Function 'Me', 'Us', 'functions', "return #{code};"
+    checks = for fn in used_fns
+                 """if (functions.#{fn} == null) {
+                       throw new errs.VBRuntimeError("Unknown function #{fn}");
+                    }
+                 """
+    body = """#{checks.join '\n'} return #{escodegen.generate tree};"""
+    #console.log 'CODE', body
+    new Function 'Me', 'Us', 'functions', 'errs', body
 
 exports.evaluate = (expr, Me, Us, functions) ->
-    tree = parse expr
+    [tree, used_fns] = parse expr
     if tree?
-        js = compile tree
-        js Me, Us, functions
+        js = compile tree, used_fns
+        js Me, Us, functions, {VBRuntimeError}
     else
         'Error parsing ' + expr
+
+class VBRuntimeError extends Error
+    constructor: (msg) ->
+        @name = 'VBRuntimeError'
+        @message = msg or @name
+exports.VBRuntimeError = VBRuntimeError
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 #parse process.argv[2]

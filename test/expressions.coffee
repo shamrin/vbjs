@@ -1,11 +1,11 @@
 # Other tests to add (from nwind.mdb):
 #    'NZ(Sum([Qtr 1]))'
 
-{evaluate} = require '../vbjs'
-{strictEqual} = require 'assert'
+{evaluate, VBRuntimeError} = require '../vbjs'
+assert = require 'assert'
 
 run = (expr, Me, Us, functions) -> evaluate expr, Me, Us, functions
-eq = (expected, actual, message) -> strictEqual actual, expected, message
+eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
 fns =
@@ -39,3 +39,5 @@ suite 'Expressions -', ->
         eq 50, run '[X] + [Y] + [Z]', X: 10, Y: 20, Z: 20
     test 'nested calls', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
+    test 'unknown function error' , ->
+        assert.throws (-> run 'Foo([F])', {F: 123}, {}, fns), VBRuntimeError
