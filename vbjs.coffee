@@ -102,14 +102,13 @@ plus = (left, right) ->
     left: left
     right: right
 
-# fns[`func_name`](me, us, `args`...)
+# fn("`func_name`")(me, us, `args`...)
 call = (func_name, args) ->
     type: 'CallExpression'
     callee:
-        type: 'MemberExpression'
-        computed: no
-        object: identifier 'fns'
-        property: identifier func_name
+        type: 'CallExpression'
+        callee: identifier 'fn'
+        'arguments': [literal func_name]
     'arguments': [identifier('me'), identifier('us')].concat args
 
 literal = (value) -> type: 'Literal', value: value
@@ -119,17 +118,19 @@ identifier = (name) -> type: 'Identifier', name: name
 compile = (tree, used_fns) ->
     #console.log 'TREE:'
     #pprint tree
-    checks = for fn in used_fns
-                 "if (fns.#{fn} == null) { err(\"Unknown function #{fn}\"); }\n"
-    body = """#{checks.join ''}return #{escodegen.generate tree};"""
+    body = "return #{escodegen.generate tree};"
     #console.log 'CODE =', "`" + body + "`"
-    new Function 'me', 'us', 'fns', 'err', body
+    new Function 'me', 'us', 'fn', body
 
 exports.evaluate = (expr, me, us, fns) ->
     [tree, used_fns] = parse expr
     if tree?
         js = compile tree, used_fns
-        js me, us, fns, (msg) -> throw new VBRuntimeError msg
+        fn = (name) ->
+                 unless fns[name]?
+                     throw new VBRuntimeError "Unknown function #{fn}"
+                 (args...) -> fns[name](args...)
+        js me, us, fn
     else
         'Error parsing ' + expr
 
