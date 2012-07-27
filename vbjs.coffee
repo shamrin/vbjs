@@ -107,11 +107,13 @@ call = (func_name, args) ->
     type: 'CallExpression'
     callee:
         type: 'MemberExpression'
-        computed: 'true'
+        computed: no
         object:
             type: 'Identifier'
             name: 'functions'
-        property: literal func_name
+        property: 
+            type: 'Identifier'
+            name: func_name
     'arguments': [{type: 'Identifier', name: 'Me'},
                   {type: 'Identifier', name: 'Us'}].concat args
 
