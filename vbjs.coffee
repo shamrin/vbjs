@@ -1,14 +1,6 @@
 parser = require "./vb.js"
 escodegen = require "escodegen"
 
-exports.evaluate = (expr, Me, Us, functions) ->
-    tree = parse expr
-    if tree?
-        js = compile tree
-        js Me, Us, functions
-    else
-        'Error parsing ' + expr
-
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
 
@@ -137,6 +129,14 @@ compile = (tree) ->
     code = escodegen.generate tree
     #console.log 'CODE', code
     new Function 'Me', 'Us', 'functions', "return #{code};"
+
+exports.evaluate = (expr, Me, Us, functions) ->
+    tree = parse expr
+    if tree?
+        js = compile tree
+        js Me, Us, functions
+    else
+        'Error parsing ' + expr
 
 # Usage: coffee vbjs.coffee "[foo]&[bar]"
 #parse process.argv[2]
