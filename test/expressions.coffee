@@ -1,6 +1,3 @@
-# Other tests to add (from nwind.mdb):
-#    'NZ(Sum([Qtr 1]))'
-
 {evaluate, compile, VBRuntimeError} = require '../vbjs'
 assert = require 'assert'
 
