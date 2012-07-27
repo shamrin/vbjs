@@ -33,8 +33,7 @@ parse = (expr) ->
                 when 'start', 'expression', 'value'
                     n.children[0].value
                 when 'literal'
-                    type: 'Literal'
-                    value: n.children[1].value
+                    literal n.children[1].value
                 when 'literal_text'
                     n.innerText()
                 when 'identifier_expr'
@@ -67,13 +66,11 @@ parse = (expr) ->
                 when 'identifier_op'
                     n.innerText()
                 when 'identifier'
-                    type: 'Literal'
-                    value: n.children[1].value
+                    literal n.children[1].value
                 when 'name', 'name_in_brackets', 'lazy_name'
                     n.innerText()
                 when 'concat_expr' 
-                    result = if n.children[1]? # force string
-                                 type: 'Literal', value: ''
+                    result = if n.children[1]? then literal '' # force string
                     for {value}, i in n.children by 2
                         result = if result? then plus result, value else value
                     result
@@ -88,10 +85,8 @@ parse = (expr) ->
                     else
                         n.children[0].value
                 when 'lazy_call_expr'
-                    [{value: func_name}, l, params..., r] = n.children
-                    call(func_name, for {value} in params by 2
-                                                  type: 'Literal'
-                                                  value: value)
+                    [{value: fn}, l, params..., r] = n.children
+                    call(fn, for {value} in params by 2 then literal value)
                 when 'lazy_value'
                     n.innerText()
 
@@ -116,11 +111,11 @@ call = (func_name, args) ->
         object:
             type: 'Identifier'
             name: 'functions'
-        property:
-            type: 'Literal'
-            value: func_name
+        property: literal func_name
     'arguments': [{type: 'Identifier', name: 'Me'},
                   {type: 'Identifier', name: 'Us'}].concat args
+
+literal = (value) -> type: 'Literal', value: value
 
 # compile to JavaScript
 compile = (tree) ->
