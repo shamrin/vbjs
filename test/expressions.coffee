@@ -4,16 +4,16 @@
 {evaluate, VBRuntimeError} = require '../vbjs'
 assert = require 'assert'
 
-run = (expr, Me, Us, functions) -> evaluate expr, Me, Us, functions
+run = (expr, me, us, fns) -> evaluate expr, me, us, fns
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
 fns =
-    Abs: (Me, Us, expr) -> Math.abs(expr)
-    Sum: (Me, Us, expr) ->
+    Abs: (me, us, expr) -> Math.abs(expr)
+    Sum: (me, us, expr) ->
         field = {'[Field]': 'Field'}[expr]
         sum = 0
-        for val in Us[field] then sum += val
+        for val in us[field] then sum += val
         sum
 
 suite 'Expressions -', ->

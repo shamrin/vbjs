@@ -39,7 +39,7 @@ parse = (expr) ->
                 when 'literal_text'
                     n.innerText()
                 when 'identifier_expr'
-                    result = identifier 'Me'
+                    result = identifier 'me'
                     for {value}, i in n.children by 2
                         result = switch op ? '.'
                             when '.' # A.B => A[B]
@@ -102,15 +102,15 @@ plus = (left, right) ->
     left: left
     right: right
 
-# functions[`func_name`](Me, Us, `args`...)
+# fns[`func_name`](me, us, `args`...)
 call = (func_name, args) ->
     type: 'CallExpression'
     callee:
         type: 'MemberExpression'
         computed: no
-        object: identifier 'functions'
+        object: identifier 'fns'
         property: identifier func_name
-    'arguments': [identifier('Me'), identifier('Us')].concat args
+    'arguments': [identifier('me'), identifier('us')].concat args
 
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
@@ -120,19 +120,16 @@ compile = (tree, used_fns) ->
     #console.log 'TREE:'
     #pprint tree
     checks = for fn in used_fns
-                 """if (functions.#{fn} == null) {
-                       err("Unknown function #{fn}");
-                    }
-                 """
-    body = """#{checks.join '\n'} return #{escodegen.generate tree};"""
-    #console.log 'CODE', body
-    new Function 'Me', 'Us', 'functions', 'err', body
+                 "if (fns.#{fn} == null) { err(\"Unknown function #{fn}\"); }\n"
+    body = """#{checks.join ''}return #{escodegen.generate tree};"""
+    #console.log 'CODE =', "`" + body + "`"
+    new Function 'me', 'us', 'fns', 'err', body
 
-exports.evaluate = (expr, Me, Us, functions) ->
+exports.evaluate = (expr, me, us, fns) ->
     [tree, used_fns] = parse expr
     if tree?
         js = compile tree, used_fns
-        js Me, Us, functions, (msg) -> throw new VBRuntimeError msg
+        js me, us, fns, (msg) -> throw new VBRuntimeError msg
     else
         'Error parsing ' + expr
 
