@@ -24,8 +24,6 @@ parse = (expr) ->
 
         return string
 
-    used_fns = []
-
     tree.traverse
         traversesTextNodes: false
         exitedNode: (n) ->
@@ -79,13 +77,11 @@ parse = (expr) ->
                 when 'call_expr'
                     if n.children.length > 1
                         [{value: fn}, l, params..., r] = n.children
-                        used_fns.push fn
                         call(fn, for {value} in params by 2 then value)
                     else
                         n.children[0].value
                 when 'lazy_call_expr'
                     [{value: fn}, l, params..., r] = n.children
-                    used_fns.push fn
                     call(fn, for {value} in params by 2 then literal value)
                 when 'lazy_value'
                     n.innerText()
@@ -93,7 +89,7 @@ parse = (expr) ->
             #if n.name is 'start' then console.log n.toString()
 
     #pprint tree
-    [tree.value, used_fns]
+    tree.value
 
 # `left` + `right`
 plus = (left, right) ->
@@ -115,7 +111,7 @@ literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
 
 # compile to JavaScript
-compile = (tree, used_fns) ->
+compile = (tree) ->
     #console.log 'TREE:'
     #pprint tree
     body = "return #{escodegen.generate tree};"
@@ -123,10 +119,10 @@ compile = (tree, used_fns) ->
     new Function 'me', 'us', 'fn', body
 
 exports.evaluate = (expr, me, us, fns) ->
-    [tree, used_fns] = parse expr
+    tree = parse expr
     if tree?
-        js = compile tree, used_fns
         fn = (name) ->
+        js = compile tree
                  unless fns[name]?
                      throw new VBRuntimeError "Unknown function #{fn}"
                  (args...) -> fns[name](args...)
