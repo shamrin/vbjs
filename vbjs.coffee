@@ -108,18 +108,21 @@ call = (func_name, args) ->
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
 
-# compile to JavaScript
-compile = (tree) ->
+# generate JavaScript for a tree
+generate = (tree) ->
     #console.log 'TREE:'
     #pprint tree
     body = "return #{escodegen.generate tree};"
     #console.log 'CODE =', "`" + body + "`"
     new Function 'me', 'us', 'fn', body
 
+exports.compile = (expr) ->
+    generate parse expr
+
 exports.evaluate = (expr, me, us, fns) ->
     tree = parse expr
     if tree?
-        js = compile tree
+        js = generate tree
         fn_get = (name) ->
                  unless fns[name]?
                      throw new VBRuntimeError "VB function '#{name}' not found"

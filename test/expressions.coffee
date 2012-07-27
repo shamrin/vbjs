@@ -1,7 +1,7 @@
 # Other tests to add (from nwind.mdb):
 #    'NZ(Sum([Qtr 1]))'
 
-{evaluate, VBRuntimeError} = require '../vbjs'
+{evaluate, compile, VBRuntimeError} = require '../vbjs'
 assert = require 'assert'
 
 run = (expr, me={}, us={}, fns={}) -> evaluate expr, me, us, fns
@@ -46,3 +46,6 @@ suite 'Expressions -', ->
         assert.throws (-> run '[Field]'), VBRuntimeError
     test 'unknown us.field error', ->
         assert.throws (-> run 'Sum([Field])', {}, {}, fns), VBRuntimeError
+    test 'generated code', ->
+        eq "function anonymous(me,us,fn) {\nreturn me('Field');\n}",
+           compile('[Field]').toString()
