@@ -121,18 +121,18 @@ compile = (tree, used_fns) ->
     #pprint tree
     checks = for fn in used_fns
                  """if (functions.#{fn} == null) {
-                       throw new errs.VBRuntimeError("Unknown function #{fn}");
+                       err("Unknown function #{fn}");
                     }
                  """
     body = """#{checks.join '\n'} return #{escodegen.generate tree};"""
     #console.log 'CODE', body
-    new Function 'Me', 'Us', 'functions', 'errs', body
+    new Function 'Me', 'Us', 'functions', 'err', body
 
 exports.evaluate = (expr, Me, Us, functions) ->
     [tree, used_fns] = parse expr
     if tree?
         js = compile tree, used_fns
-        js Me, Us, functions, {VBRuntimeError}
+        js Me, Us, functions, (msg) -> throw new VBRuntimeError msg
     else
         'Error parsing ' + expr
 
