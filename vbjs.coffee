@@ -37,26 +37,24 @@ parse = (expr) ->
                 when 'literal_text'
                     n.innerText()
                 when 'identifier_expr'
-                    result = identifier 'me'
+                    # [A].[B]![C] => me('A').dot('B').bang('C')
+                    # About bang ! operator semantics:
+                    #   * http://stackoverflow.com/q/4804947
+                    #   * http://stackoverflow.com/q/2923957
+                    #   * http://www.cpearson.com/excel/DefaultMember.aspx
                     for {value}, i in n.children by 2
-                        result = switch op ? '.'
-                            when '.' # A.B => A[B]
-                                type: 'MemberExpression'
-                                computed: yes
-                                object: result
-                                property: value
-                            when '!'
-                                # bang op: A!B => A.__default(B), links:
-                                # * http://stackoverflow.com/q/4804947
-                                # * http://stackoverflow.com/q/2923957
-                                # * http://www.cpearson.com/excel/DefaultMember.aspx
-                                type: 'CallExpression'
-                                callee: 
+                        result =
+                            type: 'CallExpression'
+                            callee:
+                                if op?
                                     type: 'MemberExpression'
                                     computed: no
                                     object: result
-                                    property: identifier '__default'
-                                'arguments': [ value ]
+                                    property: 
+                                        identifier {'.':'dot', '!':'bang'}[op]
+                                else
+                                    identifier 'me'
+                            'arguments': [ value ]
                         op = n.children[i+1]?.value
                     result
                 when 'identifier_op'
@@ -121,12 +119,16 @@ compile = (tree) ->
 exports.evaluate = (expr, me, us, fns) ->
     tree = parse expr
     if tree?
-        fn = (name) ->
         js = compile tree
+        fn_get = (name) ->
                  unless fns[name]?
                      throw new VBRuntimeError "VB function '#{name}' not found"
                  (args...) -> fns[name](args...)
-        js me, us, fn
+        me_get = (field) ->
+            unless me[field]?
+                throw new VBRuntimeError "VB field '#{field}' not found"
+            me[field]
+        js me_get, us, fn_get
     else
         'Error parsing ' + expr
 

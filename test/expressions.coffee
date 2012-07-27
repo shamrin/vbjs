@@ -28,7 +28,8 @@ suite 'Expressions -', ->
     test 'identifier operators', ->
         eq 'Total: 10', run '"Total: " & [Some Subform].[Form]![Subtotal]',
                         'Some Subform':
-                            Form: __default: (v) -> {Subtotal: 10}[v]
+                            dot: (f) -> {Form:
+                                            bang: (g) -> {Subtotal: 10}[g]}[f]
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
@@ -41,3 +42,5 @@ suite 'Expressions -', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
     test 'unknown function error' , ->
         assert.throws (-> run 'Foo([F])', {F: 123}), VBRuntimeError
+    test 'unknown field error', ->
+        assert.throws (-> run '[Field]'), VBRuntimeError
