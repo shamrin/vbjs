@@ -13,7 +13,7 @@ fns =
     Sum: (me, us, expr) ->
         field = {'[Field]': 'Field'}[expr]
         sum = 0
-        for val in us[field] then sum += val
+        for val in us(field) then sum += val
         sum
 
 suite 'Expressions -', ->
@@ -42,5 +42,7 @@ suite 'Expressions -', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
     test 'unknown function error' , ->
         assert.throws (-> run 'Foo([F])', {F: 123}), VBRuntimeError
-    test 'unknown field error', ->
+    test 'unknown me.field error', ->
         assert.throws (-> run '[Field]'), VBRuntimeError
+    test 'unknown us.field error', ->
+        assert.throws (-> run 'Sum([Field])', {}, {}, fns), VBRuntimeError
