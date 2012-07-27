@@ -127,12 +127,11 @@ exports.evaluate = (expr, me, us, fns) ->
                  unless fns[name]?
                      throw new VBRuntimeError "VB function '#{name}' not found"
                  (args...) -> fns[name](args...)
-        [me_get, us_get] = for obj in [me, us]
-            do (obj) ->
-                (field) ->
-                    unless obj[field]?
-                        throw new VBRuntimeError "VB field '#{field}' not found"
-                    obj[field]
+        [me_get, us_get] = for obj in [me, us] then do (obj) ->
+            (field) ->
+                unless obj[field]?
+                    throw new VBRuntimeError "VB field '#{field}' not found"
+                obj[field]
         js me_get, us_get, fn_get
     else
         'Error parsing ' + expr
