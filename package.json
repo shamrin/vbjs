@@ -1,0 +1,7 @@
+{
+    "name" : "vb",
+    "version" : "0.1.0",
+    "description" : "Visual Basic parser and evaluator",
+    "main": "vb.coffee"
+}
+
