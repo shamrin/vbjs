@@ -1,4 +1,4 @@
-{evaluate, compile, VBRuntimeError} = require '../vbjs'
+{evaluate, compile, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 run = (expr, me={}, us={}, fns={}) -> evaluate expr, me, us, fns
