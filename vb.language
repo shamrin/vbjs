@@ -1,4 +1,17 @@
-start = expression !.
+start
+    = module !.
+    / expression !.
+
+module = (func_def)*
+
+func_def = function name args_spec func_body end function
+
+args_spec = left_bracket (name ( comma name )* )? right_bracket
+
+func_body = (call_statement)*
+
+//call_statement = name (identifier_op name)*
+call_statement = expression
 
 expression = concat_expr
 
@@ -28,17 +41,20 @@ identifier_expr
     = identifier (identifier_op identifier)*
 
 __ = [ \t]*
+___ = [ \t\n]*
 
 identifier = '[' name_in_brackets ']' __
 
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
-name = [A-Za-z_][A-Za-z0-9_]* __
+name = [A-Za-z_][A-Za-z0-9_]* ___
 lazy_name = 'Sum'
 literal = '"' literal_text '"' __
 literal_text = [^"]*
 concat_op = '&' __
 plus_op = '+' __
-left_bracket = '(' __
-right_bracket = ')' __
+left_bracket = '(' ___
+right_bracket = ')' ___
 comma = ',' __
 identifier_op = '!' / '.'
+function = 'Function' __
+end = 'End' __

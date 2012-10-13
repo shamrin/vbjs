@@ -4,6 +4,7 @@ escodegen = require "escodegen"
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
 
+# parse VB expression or module, and return Parser API AST (for escodegen)
 parse = (expr) ->
     tree = parser.parse expr
 
@@ -84,6 +85,34 @@ parse = (expr) ->
                 when 'lazy_value'
                     n.innerText()
 
+                when 'module'
+                    type: 'ObjectExpression'
+                    properties: (value for {value} in n.children)
+                when 'func_def'
+                    name = n.children[1].value
+                    body = n.children[3].value
+                    type: 'Property'
+                    key:
+                        type: 'Literal'
+                        value: name
+                    value:
+                        type: 'FunctionExpression'
+                        id: null
+                        params: []
+                        defaults: []
+                        body:
+                           type: 'BlockStatement'
+                           body: body
+                        rest: null
+                        generator: false
+                        expression: false
+                    kind: 'init'
+                when 'func_body'
+                    for {value} in n.children
+                        value
+                when 'call_statement'
+                    n.children[0].value
+
             #if n.name is 'start' then console.log n.toString()
 
     #pprint tree
@@ -135,6 +164,16 @@ exports.evaluate = (expr, me, us, fns) ->
         js me_get, us_get, fn_get
     else
         'Error parsing ' + expr
+
+exports.loadmodule = (code) ->
+    tree = parse code
+    if tree?
+        #onsole.log 'TREE:'
+        #pprint tree
+        func = new Function "return #{escodegen.generate tree};"
+        func()
+    else
+        throw "Error parsing module '#{code[..50]}...'"
 
 class VBRuntimeError extends Error
     constructor: (msg) ->
