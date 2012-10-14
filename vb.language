@@ -1,6 +1,6 @@
 start
-    = module !.
-    / expression !.
+    = module EOF
+    / expression EOF
 
 module = (func_def)*
 
@@ -58,3 +58,5 @@ comma = ',' __
 identifier_op = '!' / '.'
 function = 'Function' __
 end = 'End' __
+
+EOF = !.
