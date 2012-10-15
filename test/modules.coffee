@@ -18,42 +18,33 @@ repr = (o, depth=0, max=2) ->
       when 'undefined' then 'undefined'
       else o
 
-logger = ->
+run = (code, expected, use) ->
     log = ''
-    object:
-        dot: (name) ->
-            (args...) ->
-                spec = (repr a for a in args).join ','
-                log += "#{name}(#{spec})\n"
-    log: ->
-        log
+    code = "Function Foo()
+            #{code}
+            End Function"
+    m = loadmodule code, DoCmd:
+                            dot: (name) ->
+                                (args...) ->
+                                    spec = (repr a for a in args).join ','
+                                    log += "#{name}(#{spec})\n"
+    m.Foo()
+    assert.strictEqual log, expected
 
 suite 'Modules -', ->
     test 'empty', ->
-        l = logger()
-        m = loadmodule """Function CloseForm()
-                          End Function""",
-                       DoCmd: l.object
-        m.CloseForm()
-        assert.strictEqual l.log(), ''
+        run '', ''
 
     test 'one line', ->
-        l = logger()
-        m = loadmodule """Function CloseForm()
-                              DoCmd.Close
-                          End Function""",
-                       DoCmd: l.object
-        m.CloseForm()
-        assert.strictEqual l.log(), """Close()\n"""
+        run 'DoCmd.Close', 'Close()\n'
+
+    test 'arguments', ->
+        run 'DoCmd.OpenForm ("Main Switchboard")',
+            'OpenForm("Main Switchboard")\n'
 
     test 'function', ->
-        l = logger()
-        m = loadmodule """Function CloseForm()
-                          ' Closes Startup form.
-                          ' Used in OnClick property of OK command button on Startup form.
-                              DoCmd.Close
-                              DoCmd.OpenForm ("Main Switchboard")
-                          End Function""",
-                       DoCmd: l.object
-        m.CloseForm()
-        assert.strictEqual l.log(), """Close()\nOpenForm("Main Switchboard")\n"""
+        run """' Closes Startup form.
+               ' Used in OnClick property of OK command button on Startup form.
+                   DoCmd.Close
+                   DoCmd.OpenForm ("Main Switchboard")
+               End Function""", 'Close()\nOpenForm("Main Switchboard")\n'
