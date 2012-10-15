@@ -111,22 +111,24 @@ parse = (expr) ->
                     for {value} in n.children
                         value
                 when 'call_statement'
-                    op = n.children[1].value
+                    for {value}, i in n.children by 2
+                        expression =
+                            type: 'CallExpression'
+                            callee:
+                                if op?
+                                    type: 'MemberExpression'
+                                    computed: no
+                                    object: expression
+                                    property:
+                                        identifier {'.':'dot', '!':'bang'}[op]
+                                else
+                                    identifier 'scope'
+                            'arguments': [ literal value ]
+                        op = n.children[i+1]?.value
                     type: 'ExpressionStatement'
                     expression:
                         type: 'CallExpression'
-                        callee:
-                            type: 'CallExpression'
-                            callee:
-                                type: 'MemberExpression'
-                                computed: no
-                                object:
-                                    type: 'CallExpression'
-                                    callee: identifier 'scope'
-                                    arguments: [literal n.children[0].value]
-                                property:
-                                    identifier {'.':'dot', '!':'bang'}[op]
-                            arguments: [literal n.children[2].value]
+                        callee: expression
                         arguments: []
                 when 'uname'
                     n.innerText().replace /\s*$/, ''

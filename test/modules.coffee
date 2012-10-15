@@ -18,18 +18,24 @@ repr = (o, depth=0, max=2) ->
       when 'undefined' then 'undefined'
       else o
 
-run = (code, expected, use) ->
+run = (code, expected) ->
     log = ''
     code = "Function Foo()
             #{code}
             End Function"
-    m = loadmodule code, DoCmd:
+    module = loadmodule code, DoCmd:
                             dot: (name) ->
                                 (args...) ->
                                     spec = (repr a for a in args).join ','
                                     log += "#{name}(#{spec})\n"
-    m.Foo()
-    assert.strictEqual log, expected
+    if expected?
+        module.Foo()
+        assert.strictEqual log, expected
+    module
+
+assert_js = (module, expected) ->
+    match = module.Foo.toString().match /^function \(\) \{\s*(.*)\s*\}$/m
+    assert.strictEqual match[1], expected
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -37,6 +43,10 @@ suite 'Modules -', ->
 
     test 'one line', ->
         run 'DoCmd.Close', 'Close()\n'
+
+    test 'nested dot', ->
+        assert_js run('DoCmd.Nested.Close'),
+                  "scope('DoCmd').dot('Nested').dot('Close')();"
 
     test 'arguments', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
