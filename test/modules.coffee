@@ -55,9 +55,12 @@ suite 'Modules -', ->
     test 'comment', ->
         run "' hi there!", ''
 
-    test 'function', ->
+    test 'double comment', ->
+        run "' hi there!\n' bye!", ''
+
+    test 'complex', ->
         run """' Closes Startup form.
                ' Used in OnClick property of OK command button on Startup form.
-                   DoCmd.Close
-                   DoCmd.OpenForm ("Main Switchboard")
-               End Function""", 'Close()\nOpenForm("Main Switchboard")\n'
+               DoCmd.Close
+               DoCmd.OpenForm ("Main Switchboard")""",
+            'Close()\nOpenForm("Main Switchboard")\n'

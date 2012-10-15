@@ -43,7 +43,7 @@ value
 identifier_expr
     = identifier (identifier_op identifier)*
 
-_ = [ \t\r\n]* (comment_start [^\r\n]* [\r\n]+)?
+_ = [ \t\r\n]* (comment_start [^\r\n]* [\r\n]+)*
 __ = [ \t]*
 
 identifier = '[' name_in_brackets ']' __
