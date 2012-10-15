@@ -55,7 +55,7 @@ parse = (expr) ->
                                         identifier {'.':'dot', '!':'bang'}[op]
                                 else
                                     identifier 'me'
-                            'arguments': [ value ]
+                            arguments: [ value ]
                         op = n.children[i+1]?.value
                     result
                 when 'identifier_op'
@@ -123,7 +123,7 @@ parse = (expr) ->
                                         identifier {'.':'dot', '!':'bang'}[op]
                                 else
                                     identifier 'scope'
-                            'arguments': [ literal value ]
+                            arguments: [ literal value ]
                         op = n.children[i+1]?.value
                     type: 'ExpressionStatement'
                     expression:
@@ -151,8 +151,8 @@ call = (func_name, args) ->
     callee:
         type: 'CallExpression'
         callee: identifier 'fn'
-        'arguments': [literal func_name]
-    'arguments': [identifier('me'), identifier('us')].concat args
+        arguments: [literal func_name]
+    arguments: [identifier('me'), identifier('us')].concat args
 
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
