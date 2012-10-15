@@ -9,9 +9,10 @@ option = OPTION [^\r\n]* EOL
 
 func_defs = ( func_def )*
 func_def = FUNCTION uname args_spec func_body END FUNCTION
-args_spec = left_bracket (uname ( comma uname )* )? right_bracket type_spec?
+args_spec = left_bracket (uname ( comma uname )* )? right_bracket type_spec? on_error?
 func_body = (call_statement)*
 type_spec = AS uname
+on_error = ONERROR GOTO uname
 
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
@@ -68,6 +69,8 @@ uname_itself = [A-Za-z_][A-Za-z0-9_]*
 FUNCTION = 'Function' __
 END = 'End' __
 OPTION = 'Option' __
+ONERROR = 'On' [ \t]+ 'Error' __
+GOTO = 'GoTo' __
 keyword
     = 'End'
     / 'Function'

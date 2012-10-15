@@ -94,3 +94,17 @@ suite 'Modules -', ->
                         DoCmd.Close
                       End Function"""
         assert_js m, "scope('DoCmd').dot('Close')();"
+
+    test 'function As Error stub', ->
+        m = runmod """Function Foo() As Boolean
+                      On Error GoTo LabelName
+                        DoCmd.Close
+                      End Function"""
+        assert_js m, "scope('DoCmd').dot('Close')();"
+
+    test 'function Error stub', ->
+        m = runmod """Function Foo()
+                      On Error GoTo LabelName
+                        DoCmd.Close
+                      End Function"""
+        assert_js m, "scope('DoCmd').dot('Close')();"
