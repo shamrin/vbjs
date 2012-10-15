@@ -43,7 +43,7 @@ assert_js = (module, expected) ->
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
     if before? then before += '\n' else before = ''
-    if after? then after += '\n' else after = ''
+    if after? then after = '\n' + after else after = ''
     if after_spec? then after_spec += '\n' else after_spec = ''
     if before_func? then before_func += '\n' else before_func = ''
     m = runmod """#{before_func}Function Foo() #{after_spec}

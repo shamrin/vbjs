@@ -112,8 +112,10 @@ parse = (expr) ->
                         expression: false
                     kind: 'init'
                 when 'func_body'
-                    for {value} in n.children
+                    for {value} in n.children when value?
                         value
+                when 'statement'
+                    n.children[0].value
                 when 'call_statement'
                     type: 'ExpressionStatement'
                     expression:
