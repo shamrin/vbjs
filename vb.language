@@ -9,8 +9,9 @@ option = OPTION [^\r\n]* EOL
 
 func_defs = ( func_def )*
 func_def = FUNCTION uname args_spec func_body END FUNCTION
-args_spec = left_bracket (uname ( comma uname )* )? right_bracket
+args_spec = left_bracket (uname ( comma uname )* )? right_bracket type_spec?
 func_body = (call_statement)*
+type_spec = AS uname
 
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
@@ -70,6 +71,7 @@ OPTION = 'Option' __
 keyword
     = 'End'
     / 'Function'
+AS = 'As' __
 
 EOF = !.
 EOL = [\r\n]+ / EOF

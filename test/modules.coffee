@@ -78,13 +78,19 @@ suite 'Modules -', ->
     test 'strange', ->
         run 'DoCmd.EndFunction', 'EndFunction()\n'
 
+    test 'empty module', ->
+        runmod ''
+
     test 'option stub', ->
         m = runmod """Option Compare Database
                       Option Explicit
                       Function Foo()
-                      DoCmd.Close
+                        DoCmd.Close
                       End Function"""
         assert_js m, "scope('DoCmd').dot('Close')();"
 
-    test 'empty module', ->
-        runmod ''
+    test 'function As stub', ->
+        m = runmod """Function Foo() As Boolean
+                        DoCmd.Close
+                      End Function"""
+        assert_js m, "scope('DoCmd').dot('Close')();"
