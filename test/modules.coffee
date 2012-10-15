@@ -23,6 +23,7 @@ run = (code, expected) ->
     code = """Function Foo()
               #{code}
               End Function"""
+    #console.log "code: `#{code}`"
     module = loadmodule code, DoCmd:
                             dot: (name) ->
                                 (args...) ->
@@ -58,9 +59,15 @@ suite 'Modules -', ->
     test 'double comment', ->
         run "' hi there!\n' bye!", ''
 
-    test 'complex', ->
-        run """' Closes Startup form.
-               ' Used in OnClick property of OK command button on Startup form.
-               DoCmd.Close
-               DoCmd.OpenForm ("Main Switchboard")""",
+    test 'double comment indented', ->
+        run "  ' hi there!\n  ' bye!", ''
+
+    test 'end comment', ->
+        run "DoCmd.Close ' this is comment", 'Close()\n'
+
+    test 'complex indented', ->
+        run "  ' Closes Startup form.\n" +
+            "  ' Used in OnClick property...\n" +
+            "   DoCmd.Close\n" +
+            "   DoCmd.OpenForm (\"Main Switchboard\")",
             'Close()\nOpenForm("Main Switchboard")\n'

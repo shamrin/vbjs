@@ -43,8 +43,10 @@ value
 identifier_expr
     = identifier (identifier_op identifier)*
 
-_ = [ \t\r\n]* (comment_start [^\r\n]* [\r\n]+)*
+_ = ( [ \t\r\n] / comment )*
 __ = [ \t]*
+
+comment = "'" [^\r\n]*
 
 identifier = '[' name_in_brackets ']' __
 
@@ -60,12 +62,12 @@ right_bracket = ')' _
 comma = ',' __
 identifier_op = '!' / '.'
 
-uname = !(keyword ![A-Za-z0-9_]) [A-Za-z_][A-Za-z0-9_]* _
+uname = !(keyword ![A-Za-z0-9_]) uname_itself _
+uname_itself = [A-Za-z_][A-Za-z0-9_]*
 function = 'Function' __
 end = 'End' __
 keyword
     = 'End'
     / 'Function'
 
-comment_start = "'"
 EOF = !.

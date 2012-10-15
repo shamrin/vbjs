@@ -135,7 +135,9 @@ parse = (expr) ->
                 when 'call_args'
                     for {value} in n.children[1..] by 2 then value
                 when 'uname'
-                    n.innerText().replace /\s*$/, ''
+                    n.children[0].value
+                when 'uname_itself'
+                    n.innerText()
 
             #if n.name is 'start' then console.log n.toString()
 
