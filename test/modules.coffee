@@ -33,16 +33,16 @@ suite 'Modules -', ->
         l = logger()
         m = loadmodule """Function CloseForm()
                           End Function""",
-                       DoCmd: l
+                       DoCmd: l.object
         m.CloseForm()
         assert.strictEqual l.log(), ''
 
-    test 'basic', ->
+    test 'one line', ->
         l = logger()
         m = loadmodule """Function CloseForm()
                               DoCmd.Close
                           End Function""",
-                       DoCmd: l
+                       DoCmd: l.object
         m.CloseForm()
         assert.strictEqual l.log(), """Close()\n"""
 
@@ -54,6 +54,6 @@ suite 'Modules -', ->
                               DoCmd.Close
                               DoCmd.OpenForm ("Main Switchboard")
                           End Function""",
-                       DoCmd: l
+                       DoCmd: l.object
         m.CloseForm()
         assert.strictEqual l.log(), """Close()\nOpenForm("Main Switchboard")\n"""

@@ -4,14 +4,13 @@ start
 
 module = (func_def)*
 
-func_def = function name args_spec func_body end function
+func_def = function uname args_spec func_body end function
 
-args_spec = left_bracket (name ( comma name )* )? right_bracket
+args_spec = left_bracket (uname ( comma uname )* )? right_bracket
 
 func_body = (call_statement)*
 
-//call_statement = name (identifier_op name)*
-call_statement = expression
+call_statement = uname (identifier_op uname)*
 
 expression = concat_expr
 
@@ -56,7 +55,12 @@ left_bracket = '(' ___
 right_bracket = ')' ___
 comma = ',' __
 identifier_op = '!' / '.'
+
+uname = !(keyword ![A-Za-z0-9_]) [A-Za-z_][A-Za-z0-9_]* ___
 function = 'Function' __
 end = 'End' __
+keyword
+    = 'End'
+    / 'Function'
 
 EOF = !.

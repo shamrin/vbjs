@@ -13,7 +13,7 @@ parse = (expr) ->
         if not spaces then spaces = ""
 
         value = (if this.value? then "=> #{repr this.value}" else '')
-        string = spaces + this.name +  " <" + this.innerText() + "> " + value
+        string = spaces + this.name +  " <" + repr(this.innerText()) + "> " + value
         children = this.children
         index = 0
 
@@ -111,7 +111,25 @@ parse = (expr) ->
                     for {value} in n.children
                         value
                 when 'call_statement'
-                    n.children[0].value
+                    op = n.children[1].value
+                    type: 'ExpressionStatement'
+                    expression:
+                        type: 'CallExpression'
+                        callee:
+                            type: 'CallExpression'
+                            callee:
+                                type: 'MemberExpression'
+                                computed: no
+                                object:
+                                    type: 'CallExpression'
+                                    callee: identifier 'scope'
+                                    arguments: [literal n.children[0].value]
+                                property:
+                                    identifier {'.':'dot', '!':'bang'}[op]
+                            arguments: [literal n.children[2].value]
+                        arguments: []
+                when 'uname'
+                    n.innerText().replace /\s*$/, ''
 
             #if n.name is 'start' then console.log n.toString()
 
@@ -165,13 +183,17 @@ exports.evaluate = (expr, me, us, fns) ->
     else
         'Error parsing ' + expr
 
-exports.loadmodule = (code) ->
+exports.loadmodule = (code, scope) ->
     tree = parse code
     if tree?
-        #onsole.log 'TREE:'
+        #console.log 'TREE:'
         #pprint tree
-        func = new Function "return #{escodegen.generate tree};"
-        func()
+        func = new Function 'scope', "return #{escodegen.generate tree};"
+        #console.log 'CODE =', "`" + func + "`"
+        func (name) ->
+                unless scope[name]?
+                    throw new VBRuntimeError "VB name '#{name}' not found"
+                scope[name]
     else
         throw "Error parsing module '#{code[..50]}...'"
 
