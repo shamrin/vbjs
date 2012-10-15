@@ -41,6 +41,16 @@ assert_js = (module, expected) ->
     match = module.Foo.toString().match /^function \(\) \{\s*(.*)\s*\}$/m
     assert.strictEqual match[1], expected
 
+test_foo_close = ({before, after, after_spec, before_func}) ->
+    if before? then before += '\n' else before = ''
+    if after? then after += '\n' else after = ''
+    if after_spec? then after_spec += '\n' else after_spec = ''
+    if before_func? then before_func += '\n' else before_func = ''
+    m = runmod """#{before_func}Function Foo() #{after_spec}
+                    #{before}DoCmd.Close#{after}
+                  End Function"""
+    assert_js m, "scope('DoCmd').dot('Close')();"
+
 suite 'Modules -', ->
     test 'empty', ->
         run '', ''
@@ -82,29 +92,16 @@ suite 'Modules -', ->
         runmod ''
 
     test 'option stub', ->
-        m = runmod """Option Compare Database
-                      Option Explicit
-                      Function Foo()
-                        DoCmd.Close
-                      End Function"""
-        assert_js m, "scope('DoCmd').dot('Close')();"
+        test_foo_close before_func: """Option Compare Database
+                                       Option Explicit"""
 
     test 'function As stub', ->
-        m = runmod """Function Foo() As Boolean
-                        DoCmd.Close
-                      End Function"""
-        assert_js m, "scope('DoCmd').dot('Close')();"
+        test_foo_close after_spec: 'As Boolean'
 
     test 'function As Error stub', ->
-        m = runmod """Function Foo() As Boolean
-                      On Error GoTo LabelName
-                        DoCmd.Close
-                      End Function"""
-        assert_js m, "scope('DoCmd').dot('Close')();"
+        test_foo_close
+            after_spec: 'As Boolean'
+            before: 'On Error GoTo LabelName'
 
     test 'function Error stub', ->
-        m = runmod """Function Foo()
-                      On Error GoTo LabelName
-                        DoCmd.Close
-                      End Function"""
-        assert_js m, "scope('DoCmd').dot('Close')();"
+        test_foo_close before: 'On Error GoTo LabelName'
