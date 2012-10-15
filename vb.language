@@ -17,9 +17,11 @@ on_error = ONERROR GOTO uname
 statement
     = resume_statement
     / exit_statement
+    / dim_statement
     / call_statement
 resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
+dim_statement = DIM uname AS uname
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
 call_args = left_bracket (expression ( comma expression )* )? right_bracket
@@ -79,6 +81,7 @@ ONERROR = 'On' [ \t]+ 'Error' __
 GOTO = 'GoTo' __
 RESUME = 'Resume' __
 EXIT = 'Exit' __
+DIM = 'Dim' __
 keyword
     = 'End'
     / 'Function'
