@@ -10,7 +10,11 @@ args_spec = left_bracket (uname ( comma uname )* )? right_bracket
 
 func_body = (call_statement)*
 
-call_statement = uname (identifier_op uname)*
+call_statement = callee call_args?
+
+callee = uname (identifier_op uname)*
+
+call_args = left_bracket (expression ( comma expression )* )? right_bracket
 
 expression = concat_expr
 

@@ -111,6 +111,12 @@ parse = (expr) ->
                     for {value} in n.children
                         value
                 when 'call_statement'
+                    type: 'ExpressionStatement'
+                    expression:
+                        type: 'CallExpression'
+                        callee: n.children[0].value
+                        arguments: n.children[1]?.value ? []
+                when 'callee'
                     for {value}, i in n.children by 2
                         expression =
                             type: 'CallExpression'
@@ -125,11 +131,9 @@ parse = (expr) ->
                                     identifier 'scope'
                             arguments: [ literal value ]
                         op = n.children[i+1]?.value
-                    type: 'ExpressionStatement'
-                    expression:
-                        type: 'CallExpression'
-                        callee: expression
-                        arguments: []
+                    expression
+                when 'call_args'
+                    for {value} in n.children[1..] by 2 then value
                 when 'uname'
                     n.innerText().replace /\s*$/, ''
 
