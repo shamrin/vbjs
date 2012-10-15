@@ -43,28 +43,29 @@ value
 identifier_expr
     = identifier (identifier_op identifier)*
 
+_ = [ \t\r\n]* (comment_start [^\r\n]* [\r\n]+)?
 __ = [ \t]*
-___ = [ \t\n]*
 
 identifier = '[' name_in_brackets ']' __
 
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
-name = [A-Za-z_][A-Za-z0-9_]* ___
+name = [A-Za-z_][A-Za-z0-9_]* _
 lazy_name = 'Sum'
 literal = '"' literal_text '"' __
 literal_text = [^"]*
 concat_op = '&' __
 plus_op = '+' __
-left_bracket = '(' ___
-right_bracket = ')' ___
+left_bracket = '(' _
+right_bracket = ')' _
 comma = ',' __
 identifier_op = '!' / '.'
 
-uname = !(keyword ![A-Za-z0-9_]) [A-Za-z_][A-Za-z0-9_]* ___
+uname = !(keyword ![A-Za-z0-9_]) [A-Za-z_][A-Za-z0-9_]* _
 function = 'Function' __
 end = 'End' __
 keyword
     = 'End'
     / 'Function'
 
+comment_start = "'"
 EOF = !.

@@ -20,9 +20,9 @@ repr = (o, depth=0, max=2) ->
 
 run = (code, expected) ->
     log = ''
-    code = "Function Foo()
-            #{code}
-            End Function"
+    code = """Function Foo()
+              #{code}
+              End Function"""
     module = loadmodule code, DoCmd:
                             dot: (name) ->
                                 (args...) ->
@@ -51,6 +51,9 @@ suite 'Modules -', ->
     test 'arguments', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
             'OpenForm("Main Switchboard")\n'
+
+    test 'comment', ->
+        run "' hi there!", ''
 
     test 'function', ->
         run """' Closes Startup form.
