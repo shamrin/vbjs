@@ -15,9 +15,11 @@ type_spec = AS uname
 on_error = ONERROR GOTO uname
 
 statement
-    = builtin_statement
+    = resume_statement
+    / exit_statement
     / call_statement
-builtin_statement = RESUME uname
+resume_statement = RESUME uname
+exit_statement = EXIT FUNCTION
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
 call_args = left_bracket (expression ( comma expression )* )? right_bracket
@@ -70,12 +72,13 @@ identifier_op = '!' / '.'
 
 uname = !(keyword ![A-Za-z0-9_]) uname_itself _
 uname_itself = [A-Za-z_][A-Za-z0-9_]*
-FUNCTION = 'Function' __
+FUNCTION = 'Function' _
 END = 'End' __
 OPTION = 'Option' __
 ONERROR = 'On' [ \t]+ 'Error' __
 GOTO = 'GoTo' __
 RESUME = 'Resume' __
+EXIT = 'Exit' __
 keyword
     = 'End'
     / 'Function'
