@@ -6,6 +6,12 @@ vb.js: vb.coffee
 	coffee -c vb.coffee
 
 test: parser.js
+    # Usage:
+    #     $ make test TEST="grep pattern"
+    ifdef TEST
+	mocha --compilers coffee:coffee-script --ui tdd --grep "$(TEST)"
+    else
 	mocha --compilers coffee:coffee-script --ui tdd
+    endif
 
 .PHONY: test
