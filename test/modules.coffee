@@ -88,6 +88,10 @@ suite 'Modules -', ->
     test 'strange', ->
         run 'DoCmd.EndFunction', 'EndFunction()\n'
 
+    test 'leading empty line', ->
+        m = runmod "\nFunction Foo()\nDoCmd.Close\nEnd Function"
+        assert_js m, "scope('DoCmd').dot('Close')();"
+
     test 'empty module', ->
         runmod ''
 
@@ -105,3 +109,44 @@ suite 'Modules -', ->
 
     test 'function Error stub', ->
         test_foo_close before: 'On Error GoTo LabelName'
+
+    test 'Resume stub', ->
+        test_foo_close
+            before: 'On Error GoTo LabelName'
+            after: 'Resume LabelName'
+
+    test 'Exit stub', ->
+        test_foo_close after: 'Exit Function'
+
+    test 'Exit Function', ->
+        test_foo_close after: """Exit Function
+                                 DoCmd.WillNotRun"""
+
+    test 'Label stub', ->
+        test_foo_close
+            before: 'On Error GoTo FooError'
+            after: """FooExit:
+                          Exit Function
+                      FooError:
+                          DoCmd.HandleError
+                          Resume FooExit"""
+
+    test 'Const Set stub', ->
+        test_foo_close before: """Const someConst = 42
+                                  Set someVal = 43"""
+
+    test 'Dim stub', ->
+        test_foo_close before: 'Dim returnValue As Boolean'
+
+    test 'assign stub', ->
+        test_foo_close before: """Dim returnValue As Boolean
+                                  returnValue = False"""
+
+    test 'If stub', ->
+        test_foo_close after: """FooErr:
+                                 If Err = 3270 Then
+                                     DoCmd.Bla
+                                     Resume FooExit
+                                 End If"""
+
+    test 'If Or stub'
