@@ -86,8 +86,12 @@ parse = (expr) ->
                     n.innerText()
 
                 when 'module'
+                    n.children[1].value
+
+                when 'func_defs'
                     type: 'ObjectExpression'
-                    properties: (value for {value} in n.children)
+                    properties: (value for {value} in n.children ? [])
+
                 when 'func_def'
                     name = n.children[1].value
                     body = n.children[3].value
@@ -203,7 +207,7 @@ exports.loadmodule = (code, scope) ->
                     throw new VBRuntimeError "VB name '#{name}' not found"
                 scope[name]
     else
-        throw "Error parsing module '#{code[..50]}...'"
+        throw "Error parsing module '#{code[..100]}...'"
 
 class VBRuntimeError extends Error
     constructor: (msg) ->

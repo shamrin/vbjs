@@ -34,6 +34,9 @@ run = (code, expected) ->
         assert.strictEqual log, expected
     module
 
+runmod = (code) ->
+    loadmodule code
+
 assert_js = (module, expected) ->
     match = module.Foo.toString().match /^function \(\) \{\s*(.*)\s*\}$/m
     assert.strictEqual match[1], expected
@@ -71,3 +74,17 @@ suite 'Modules -', ->
             "   DoCmd.Close\n" +
             "   DoCmd.OpenForm (\"Main Switchboard\")",
             'Close()\nOpenForm("Main Switchboard")\n'
+
+    test 'strange', ->
+        run 'DoCmd.EndFunction', 'EndFunction()\n'
+
+    test 'option stub', ->
+        m = runmod """Option Compare Database
+                      Option Explicit
+                      Function Foo()
+                      DoCmd.Close
+                      End Function"""
+        assert_js m, "scope('DoCmd').dot('Close')();"
+
+    test 'empty module', ->
+        runmod ''

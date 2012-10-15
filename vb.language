@@ -2,18 +2,18 @@ start
     = module EOF
     / expression EOF
 
-module = (func_def)*
+module = options func_defs
 
+options = ( option )*
+option = OPTION [^\r\n]* EOL
+
+func_defs = ( func_def )*
 func_def = function uname args_spec func_body end function
-
 args_spec = left_bracket (uname ( comma uname )* )? right_bracket
-
 func_body = (call_statement)*
 
 call_statement = callee call_args?
-
 callee = uname (identifier_op uname)*
-
 call_args = left_bracket (expression ( comma expression )* )? right_bracket
 
 expression = concat_expr
@@ -66,8 +66,10 @@ uname = !(keyword ![A-Za-z0-9_]) uname_itself _
 uname_itself = [A-Za-z_][A-Za-z0-9_]*
 function = 'Function' __
 end = 'End' __
+OPTION = 'Option' __
 keyword
     = 'End'
     / 'Function'
 
 EOF = !.
+EOL = [\r\n]+ / EOF
