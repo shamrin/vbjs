@@ -31,7 +31,7 @@ parse = (expr) ->
             n.value = switch n.name
                 when '#document', 'source' # language.js nodes
                     n.children?[0]?.value
-                when 'start', 'expression', 'value'
+                when 'start', 'expression', 'value', 'identifier'
                     n.children[0].value
                 when 'literal'
                     literal n.children[1].value
@@ -60,7 +60,7 @@ parse = (expr) ->
                     result
                 when 'identifier_op'
                     n.innerText()
-                when 'identifier'
+                when 'bracketed_identifier'
                     literal n.children[1].value
                 when 'name', 'name_in_brackets', 'lazy_name'
                     n.innerText()

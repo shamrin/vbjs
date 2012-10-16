@@ -19,6 +19,7 @@ statement
     / exit_statement
     / dim_statement
     / set_statement
+    / if_statement
     / assign_statement
     / label_statement
     / call_statement
@@ -26,6 +27,7 @@ resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS uname
 set_statement = (CONST / SET) uname EQUAL expression
+if_statement = IF expression EQUAL expression THEN func_body ENDIF
 assign_statement = uname EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_args?
@@ -49,7 +51,7 @@ lazy_call_expr
     = lazy_name left_bracket (lazy_value (comma lazy_value)* )? right_bracket
 
 lazy_value
-    = identifier
+    = bracketed_identifier
     / literal
     
 value
@@ -67,10 +69,13 @@ __ = [ \t]*
 
 comment = "'" [^\r\n]*
 
-identifier = '[' name_in_brackets ']' __
-
+identifier
+    = bracketed_identifier
+    / uname
+bracketed_identifier = '[' name_in_brackets ']' __
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
 name = [A-Za-z_][A-Za-z0-9_]* _
+
 lazy_name = 'Sum'
 literal = '"' literal_text '"' __
 literal_text = [^"]*
@@ -94,6 +99,9 @@ EXIT = 'Exit' __
 DIM = 'Dim' __
 CONST = 'Const' __
 SET = 'Set' __
+IF = 'If' __
+THEN = 'Then' _
+ENDIF = END IF _
 EQUAL = '=' __
 COLON = ':' _
 TRUE = 'True' _
@@ -101,6 +109,10 @@ FALSE = 'False' _
 keyword
     = 'End'
     / 'Function'
+    / 'Then'
+    / 'If'
+    / 'Set'
+    / 'Const'
 AS = 'As' __
 
 EOF = !.
