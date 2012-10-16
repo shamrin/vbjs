@@ -1,0 +1,37 @@
+#!/usr/bin/env coffee
+
+fs = require 'fs'
+pegjs = require 'pegjs'
+
+print_error = (filename, source, error) ->
+    line = source.split('\n')[error.line - 1]
+    marker = (new Array error.column).join(' ') + '^'
+
+    console.log """\nFile #{filename}, line #{error.line}
+                       #{line}
+                       #{marker}
+                   #{error.name}: #{error.message}"""
+
+[grammarfile, outputfile] = process.argv[2..]
+
+unless grammarfile? and outputfile?
+    console.log "usage: ./pegjs_build <grammarfile> <outputfile>"
+    process.exit 2
+
+grammar = fs.readFileSync grammarfile, 'utf8'
+try
+    parser = pegjs.buildParser grammar
+catch error
+    print_error grammarfile, grammar, error
+    process.exit 1
+
+fs.writeFileSync outputfile,
+                 """var parser = #{parser.toSource()};
+                    var print_error = #{print_error.toString()};
+                    exports.check = function(filename, source) {
+                        try {
+                            parser.parse(source);
+                        } catch (error) {
+                            print_error(filename, source, error);
+                        }
+                    };"""
