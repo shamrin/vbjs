@@ -20,12 +20,14 @@ statement
     / dim_statement
     / set_statement
     / assign_statement
+    / label_statement
     / call_statement
 resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS uname
 set_statement = (CONST / SET) uname EQUAL expression
 assign_statement = uname EQUAL expression
+label_statement = uname COLON
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
 call_args = left_bracket (expression ( comma expression )* )? right_bracket
@@ -93,6 +95,7 @@ DIM = 'Dim' __
 CONST = 'Const' __
 SET = 'Set' __
 EQUAL = '=' __
+COLON = ':' _
 TRUE = 'True' _
 FALSE = 'False' _
 keyword

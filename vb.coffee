@@ -212,7 +212,7 @@ exports.loadmodule = (code, scope) ->
                     throw new VBRuntimeError "VB name '#{name}' not found"
                 scope[name]
     else
-        throw "Error parsing module '#{code[..100]}...'"
+        throw "Error parsing module '#{code[..150]}...'"
 
 class VBRuntimeError extends Error
     constructor: (msg) ->

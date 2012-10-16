@@ -130,13 +130,13 @@ suite 'Modules -', ->
                DoCmd.WillNotRun""", 'Close()\n'
 
     test 'Label stub', ->
-        test_foo_close
-            before: 'On Error GoTo FooError'
-            after: """FooExit:
-                          Exit Function
-                      FooError:
-                          DoCmd.HandleError
-                          Resume FooExit"""
+        run """On Error GoTo FooError
+                   DoCmd.Close
+               FooExit:
+                   Exit Function
+               FooError:
+                   DoCmd.HandleError
+                   Resume FooExit""", 'Close()\n'
 
     test 'Const Set stub', ->
         test_foo_close before: """Const someConst = 42
