@@ -42,13 +42,17 @@ assert_js = (module, expected) ->
     assert.strictEqual match[1], expected
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
-    if before? then before += '\n' else before = ''
-    if after? then after = '\n' + after else after = ''
-    if after_spec? then after_spec += '\n' else after_spec = ''
-    if before_func? then before_func += '\n' else before_func = ''
+    fill = (s) -> if s? then s + '\n' else ''
+
+    before_func = fill before_func
+    before = fill before
+    after = fill after
+    unless after_spec?
+        after_spec = ''
+
     m = runmod """#{before_func}Function Foo() #{after_spec}
-                    #{before}DoCmd.Close#{after}
-                  End Function"""
+                    #{before}DoCmd.Close
+                    #{after}End Function"""
     assert_js m, "scope('DoCmd').dot('Close')();"
 
 suite 'Modules -', ->
