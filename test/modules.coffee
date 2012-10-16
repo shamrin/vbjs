@@ -156,4 +156,7 @@ suite 'Modules -', ->
                                      Resume FooExit
                                  End If"""
 
+    test 'If Else stub'
     test 'If Or stub'
+    test '_ stub'
+    test 'several functions'

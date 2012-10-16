@@ -8,9 +8,9 @@ options = option*
 option = OPTION [^\r\n]* EOL
 
 func_defs = func_def*
-func_def = FUNCTION uname args_spec func_body END FUNCTION
+func_def = FUNCTION uname args_spec statements END FUNCTION
 args_spec = left_bracket (uname (comma uname)* )? right_bracket type_spec? on_error?
-func_body = statement*
+statements = statement*
 type_spec = AS uname
 on_error = ONERROR GOTO uname
 
@@ -27,7 +27,7 @@ resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS uname
 set_statement = (CONST / SET) uname EQUAL expression
-if_statement = IF expression EQUAL expression THEN func_body ENDIF
+if_statement = IF expression EQUAL expression THEN statements ENDIF
 assign_statement = uname EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_args?

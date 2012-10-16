@@ -111,7 +111,7 @@ parse = (expr) ->
                         generator: false
                         expression: false
                     kind: 'init'
-                when 'func_body'
+                when 'statements'
                     for {value} in n.children when value?
                         value
                 when 'statement'
