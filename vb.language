@@ -18,11 +18,13 @@ statement
     = resume_statement
     / exit_statement
     / dim_statement
+    / set_statement
     / assign_statement
     / call_statement
 resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS uname
+set_statement = (CONST / SET) uname EQUAL expression
 assign_statement = uname EQUAL expression
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
@@ -76,7 +78,7 @@ left_bracket = '(' _
 right_bracket = ')' _
 comma = ',' __
 identifier_op = '!' / '.'
-number = [0-9]+
+number = [0-9]+ _
 
 uname = !(keyword ![A-Za-z0-9_]) uname_itself _
 uname_itself = [A-Za-z_][A-Za-z0-9_]*
@@ -88,6 +90,8 @@ GOTO = 'GoTo' __
 RESUME = 'Resume' __
 EXIT = 'Exit' __
 DIM = 'Dim' __
+CONST = 'Const' __
+SET = 'Set' __
 EQUAL = '=' __
 TRUE = 'True' _
 FALSE = 'False' _
