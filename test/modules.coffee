@@ -166,4 +166,9 @@ suite 'Modules -', ->
 
     test 'If Or stub'
     test '_ stub'
+    test 'Condition in braces stub', ->
+        test_foo_close before: """If (IsItReplica()) Then
+                                      DoCmd.TellAboutIt
+                                  End If"""
+
     test 'several functions'

@@ -38,7 +38,11 @@ if_condition
     = expression EQUAL expression
     / expression
 
-expression = concat_expr
+expression
+    = expression_in_braces
+    / concat_expr
+
+expression_in_braces = LEFT_BRACE expression RIGHT_BRACE
 
 concat_expr
     = add_expr (concat_op add_expr)*
@@ -110,6 +114,8 @@ EQUAL = '=' __
 COLON = ':' _
 TRUE = 'True' _
 FALSE = 'False' _
+LEFT_BRACE = '(' _
+RIGHT_BRACE = ')' _
 keyword
     = 'End'
     / 'Function'
