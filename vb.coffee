@@ -208,7 +208,12 @@ exports.loadmodule = (code, scope) ->
     if tree?
         #console.log 'TREE:'
         #pprint tree
-        func = new Function 'scope', "return #{escodegen.generate tree};"
+        body = "return #{escodegen.generate tree};"
+        try
+            func = new Function 'scope', body
+        catch error
+            console.log "#{error} in `#{body}`"
+            throw error
         #console.log 'CODE =', "`" + func + "`"
         func (name) ->
                 unless scope[name]?
