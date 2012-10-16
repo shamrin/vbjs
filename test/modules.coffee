@@ -156,7 +156,14 @@ suite 'Modules -', ->
                                      Resume FooExit
                                  End If"""
 
-    test 'If Else stub'
+    test 'If Else stub', ->
+        test_foo_close before: """If IsItReplica() Then
+                                      DoCmd.TellAboutIt
+                                  Else
+                                      DoCmd.DoSomething
+                                      DoCmd.DoSomethingElse
+                                  End If"""
+
     test 'If Or stub'
     test '_ stub'
     test 'several functions'
