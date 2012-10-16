@@ -150,7 +150,7 @@ parse = (expr) ->
 
             #if n.name is 'start' then console.log n.toString()
 
-    if not tree.value? and process?.env['TESTING']?
+    if not tree.value? and process?.env?.TESTING?
         require('./test/pegjs_parser').check '<string>', expr
 
     #pprint tree
