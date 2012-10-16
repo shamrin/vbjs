@@ -88,7 +88,7 @@ parse = (expr) ->
                     literal parseInt(n.innerText(), 10)
 
                 when 'module'
-                    n.children[1].value
+                    n.children[2].value
                 when 'func_defs'
                     type: 'ObjectExpression'
                     properties: (value for {value} in n.children ? [])

@@ -99,7 +99,7 @@ suite 'Modules -', ->
 
     test 'leading empty line', ->
         m = runmod "\nFunction Foo()\nDoCmd.Close\nEnd Function"
-        assert_js m, "scope('DoCmd').dot('Close')();"
+        assert_js m, "scope('DoCmd').dot('Close')();\n"
 
     test 'empty module', ->
         runmod ''

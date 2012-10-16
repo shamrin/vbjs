@@ -2,7 +2,7 @@ start
     = module EOF
     / expression EOF
 
-module = options func_defs
+module = _ options func_defs
 
 options = option*
 option = OPTION [^\r\n]* EOL
