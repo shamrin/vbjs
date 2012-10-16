@@ -84,6 +84,8 @@ parse = (expr) ->
                     call(fn, for {value} in params by 2 then literal value)
                 when 'lazy_value'
                     n.innerText()
+                when 'number'
+                    literal parseInt(n.innerText(), 10)
 
                 when 'module'
                     n.children[1].value
