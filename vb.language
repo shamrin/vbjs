@@ -4,12 +4,12 @@ start
 
 module = options func_defs
 
-options = ( option )*
+options = option*
 option = OPTION [^\r\n]* EOL
 
-func_defs = ( func_def )*
+func_defs = func_def*
 func_def = FUNCTION uname args_spec func_body END FUNCTION
-args_spec = left_bracket (uname ( comma uname )* )? right_bracket type_spec? on_error?
+args_spec = left_bracket (uname (comma uname)* )? right_bracket type_spec? on_error?
 func_body = statement*
 type_spec = AS uname
 on_error = ONERROR GOTO uname
@@ -30,7 +30,7 @@ assign_statement = uname EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
-call_args = left_bracket (expression ( comma expression )* )? right_bracket
+call_args = left_bracket (expression (comma expression)* )? right_bracket
 
 expression = concat_expr
 
@@ -42,7 +42,7 @@ add_expr
 
 call_expr
     = lazy_call_expr
-    / name left_bracket (expression ( comma expression )* )? right_bracket
+    / name left_bracket (expression (comma expression)* )? right_bracket
     / value
 
 lazy_call_expr
