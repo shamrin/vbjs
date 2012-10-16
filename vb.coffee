@@ -89,11 +89,9 @@ parse = (expr) ->
 
                 when 'module'
                     n.children[1].value
-
                 when 'func_defs'
                     type: 'ObjectExpression'
                     properties: (value for {value} in n.children ? [])
-
                 when 'func_def'
                     name = n.children[1].value
                     body = n.children[3].value
@@ -118,6 +116,9 @@ parse = (expr) ->
                         value
                 when 'statement'
                     n.children[0].value
+                when 'exit_statement'
+                    type: 'ReturnStatement'
+                    argument: null
                 when 'call_statement'
                     type: 'ExpressionStatement'
                     expression:

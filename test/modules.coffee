@@ -38,8 +38,9 @@ runmod = (code) ->
     loadmodule code
 
 assert_js = (module, expected) ->
-    match = module.Foo.toString().match /^function \(\) \{\s*(.*)\s*\}$/m
-    assert.strictEqual match[1], expected
+    match = module.Foo.toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
+    body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
+    assert.strictEqual body, expected
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
     fill = (s) -> if s? then s + '\n' else ''
@@ -53,7 +54,7 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
     m = runmod """#{before_func}Function Foo() #{after_spec}
                     #{before}DoCmd.Close
                     #{after}End Function"""
-    assert_js m, "scope('DoCmd').dot('Close')();"
+    assert_js m, "scope('DoCmd').dot('Close')();\n"
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -64,7 +65,7 @@ suite 'Modules -', ->
 
     test 'nested dot', ->
         assert_js run('DoCmd.Nested.Close'),
-                  "scope('DoCmd').dot('Nested').dot('Close')();"
+                  "scope('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
@@ -123,12 +124,10 @@ suite 'Modules -', ->
             before: 'On Error GoTo LabelName'
             after: 'Resume LabelName'
 
-    test 'Exit stub', ->
-        test_foo_close after: 'Exit Function'
-
     test 'Exit Function', ->
-        test_foo_close after: """Exit Function
-                                 DoCmd.WillNotRun"""
+        run """DoCmd.Close
+               Exit Function
+               DoCmd.WillNotRun""", 'Close()\n'
 
     test 'Label stub', ->
         test_foo_close
