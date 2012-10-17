@@ -37,10 +37,11 @@ run = (code, expected) ->
 runmod = (code) ->
     loadmodule code
 
-assert_js = (module, expected) ->
-    match = module.Foo.toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
-    body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
-    assert.strictEqual body, expected
+assert_js = (module, expected_obj) ->
+    for fn, expected of expected_obj
+        match = module[fn].toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
+        body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
+        assert.strictEqual body, expected
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
     fill = (s) -> if s? then s + '\n' else ''
@@ -54,7 +55,7 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
     m = runmod """#{before_func}Function Foo() #{after_spec}
                     #{before}DoCmd.Close
                     #{after}End Function"""
-    assert_js m, "scope('DoCmd').dot('Close')();\n"
+    assert_js m, Foo: "scope('DoCmd').dot('Close')();\n"
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -66,11 +67,11 @@ suite 'Modules -', ->
     # SKIPPED
     if 0 then test 'function().property', ->
         m = runmod """CurrentDb().Properties("StartupForm")"""
-        assert_js m, "scope('CurrentDb')().dot('Properties')('StartupForm');"
+        assert_js m, Foo: "scope('CurrentDb')().dot('Properties')('StartupForm');"
 
     test 'nested dot', ->
         assert_js run('DoCmd.Nested.Close'),
-                  "scope('DoCmd').dot('Nested').dot('Close')();\n"
+                  Foo: "scope('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
@@ -104,7 +105,7 @@ suite 'Modules -', ->
 
     test 'leading empty line', ->
         m = runmod "\nFunction Foo()\nDoCmd.Close\nEnd Function"
-        assert_js m, "scope('DoCmd').dot('Close')();\n"
+        assert_js m, Foo: "scope('DoCmd').dot('Close')();\n"
 
     test 'empty module', ->
         runmod ''
@@ -181,4 +182,14 @@ suite 'Modules -', ->
                 Forms!Startup!HideStartupForm = False
             End If"""
 
-    test 'several functions'
+    test 'several functions', ->
+        m = runmod """Function Foo()
+                          DoCmd.Open
+                      End Function
+                      ' Second function
+                      Function Bar()
+                          DoCmd.Close
+                      End Function"""
+        assert_js m,
+            Foo: "scope('DoCmd').dot('Open')();\n"
+            Bar: "scope('DoCmd').dot('Close')();\n"
