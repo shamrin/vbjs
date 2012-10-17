@@ -4,12 +4,16 @@ fs = require 'fs'
 pegjs = require 'pegjs'
 
 print_error = (filename, source, error) ->
-    line = source.split('\n')[error.line - 1]
-    marker = (new Array error.column).join(' ') + '^'
+    indent = "    "
+    marked_line = if error.line?
+                      """#{indent}#{source.split('\n')[error.line - 1]}
+                         #{indent}#{(new Array error.column).join(' ') + '^'}
+                      """
+                  else
+                      ""
 
-    console.log """\nFile #{filename}, line #{error.line}
-                       #{line}
-                       #{marker}
+    console.log """File #{filename}, line #{error.line ? '?'}
+                   #{marked_line}
                    #{error.name}: #{error.message}"""
 
 [grammarfile, outputfile] = process.argv[2..]
