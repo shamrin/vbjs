@@ -90,7 +90,7 @@ name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
 name = [A-Za-z_][A-Za-z0-9_]* _
 
 lazy_name = 'Sum'
-literal = '"' literal_text '"' __
+literal = '"' literal_text '"' _
 literal_text = [^"]*
 concat_op = '&' __
 plus_op = '+' __

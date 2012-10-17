@@ -153,8 +153,8 @@ suite 'Modules -', ->
         test_foo_close before: 'Dim returnValue As Boolean'
 
     test 'assign stub', ->
-        test_foo_close before: """Dim returnValue As Boolean
-                                  returnValue = False"""
+        test_foo_close before: """foo = "Foo"
+                                  bar = False"""
 
     test 'If stub', ->
         test_foo_close after: """FooErr:
