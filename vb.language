@@ -27,22 +27,22 @@ resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS uname
 set_statement = (CONST / SET) uname EQUAL expression
-if_statement = IF if_condition THEN statements ENDIF
-assign_statement = uname EQUAL expression
+if_statement = IF expression THEN statements ENDIF
+assign_statement = identifier_expr EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
 call_args = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 
-if_condition
-    = expression EQUAL expression
-    / expression
-
 expression
     = expression_in_braces
-    / concat_expr
+    / or_expr
 
 expression_in_braces = LEFT_PAREN expression RIGHT_PAREN
+
+or_expr = cmp_expr (OR cmp_expr)*
+
+cmp_expr = concat_expr (EQUAL concat_expr)?
 
 concat_expr
     = add_expr (concat_op add_expr)*
@@ -52,8 +52,11 @@ add_expr
 
 call_expr
     = lazy_call_expr
-    / name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
     / value
+    / plain_call_expr
+
+plain_call_expr
+    = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 
 lazy_call_expr
     = lazy_name LEFT_PAREN (lazy_value (comma lazy_value)* )? RIGHT_PAREN
@@ -69,10 +72,12 @@ value
     / FALSE
     / number
 
-identifier_expr
-    = identifier (identifier_op identifier)*
+identifier_expr = identifier_expr_part (identifier_op identifier_expr_part)*
+identifier_expr_part
+    = plain_call_expr
+    / identifier
 
-_ = ( [ \t\r\n] / comment )*
+_ = ( [ \t\r\n] / comment / '_')*
 __ = [ \t]*
 
 comment = "'" [^\r\n]*
@@ -114,6 +119,7 @@ TRUE = 'True' _
 FALSE = 'False' _
 LEFT_PAREN = '(' _
 RIGHT_PAREN = ')' _
+OR = 'Or' _
 keyword
     = 'End'
     / 'Function'
@@ -121,6 +127,7 @@ keyword
     / 'If'
     / 'Set'
     / 'Const'
+    / 'Or'
 AS = 'As' __
 
 EOF = !.

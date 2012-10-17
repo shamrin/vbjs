@@ -164,11 +164,16 @@ suite 'Modules -', ->
                                       DoCmd.DoSomethingElse
                                   End If"""
 
-    test 'If Or stub'
-    test '_ stub'
     test 'Condition in braces stub', ->
         test_foo_close before: """If (IsItReplica()) Then
                                       DoCmd.TellAboutIt
                                   End If"""
+
+    test 'If Or _ stub', ->
+        test_foo_close before: """
+            If (CurrentDb().Properties("StartupForm") = "Startup" Or _
+                CurrentDb().Properties("StartupForm") = "Form.Startup") Then
+                Forms!Startup!HideStartupForm = False
+            End If"""
 
     test 'several functions'

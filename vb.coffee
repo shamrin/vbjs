@@ -4,6 +4,8 @@ escodegen = require "escodegen"
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
 
+member = (op) -> {'.': 'dot', '!': 'bang'}[op]
+
 # parse VB expression or module, and return Parser API AST (for escodegen)
 parse = (expr) ->
     tree = parser.parse expr
@@ -31,7 +33,8 @@ parse = (expr) ->
             n.value = switch n.name
                 when '#document', 'source' # language.js nodes
                     n.children?[0]?.value
-                when 'start', 'expression', 'value', 'identifier'
+                when 'start', 'expression', 'value', \
+                         'identifier', 'identifier_expr_part'
                     n.children[0].value
                 when 'literal'
                     literal n.children[1].value
@@ -43,20 +46,22 @@ parse = (expr) ->
                     #   * http://stackoverflow.com/q/4804947
                     #   * http://stackoverflow.com/q/2923957
                     #   * http://www.cpearson.com/excel/DefaultMember.aspx
-                    for {value}, i in n.children by 2
+                    result = n.children[0].value
+                    if result.type is 'Literal'
+                        result =
+                            type: 'CallExpression'
+                            callee: identifier 'me'
+                            arguments: [ result ]
+                    for {value: arg}, i in n.children by 2 when i > 0
                         result =
                             type: 'CallExpression'
                             callee:
-                                if op?
-                                    type: 'MemberExpression'
-                                    computed: no
-                                    object: result
-                                    property: 
-                                        identifier {'.':'dot', '!':'bang'}[op]
-                                else
-                                    identifier 'me'
-                            arguments: [ value ]
-                        op = n.children[i+1]?.value
+                                type: 'MemberExpression'
+                                computed: no
+                                object: result
+                                property:
+                                    identifier member n.children[i-1].value
+                            arguments: [ arg ]
                     result
                 when 'identifier_op'
                     n.innerText()
@@ -64,6 +69,8 @@ parse = (expr) ->
                     literal n.children[1].value
                 when 'name', 'name_in_brackets', 'lazy_name'
                     n.innerText()
+                when 'or_expr', 'cmp_expr'
+                    n.children[0].value # FIXME it's just a stub now
                 when 'concat_expr' 
                     result = if n.children[1]? then literal '' # force string
                     for {value}, i in n.children by 2
@@ -74,11 +81,10 @@ parse = (expr) ->
                         result = if result? then plus result, value else value
                     result
                 when 'call_expr'
-                    if n.children.length > 1
-                        [{value: fn}, l, params..., r] = n.children
-                        call(fn, for {value} in params by 2 then value)
-                    else
-                        n.children[0].value
+                    n.children[0].value
+                when 'plain_call_expr'
+                    [{value: fn}, l, params..., r] = n.children
+                    call(fn, for {value} in params by 2 then value)
                 when 'lazy_call_expr'
                     [{value: fn}, l, params..., r] = n.children
                     call(fn, for {value} in params by 2 then literal value)
@@ -126,20 +132,20 @@ parse = (expr) ->
                         callee: n.children[0].value
                         arguments: n.children[1]?.value ? []
                 when 'callee'
-                    for {value}, i in n.children by 2
+                    expression =
+                        type: 'CallExpression'
+                        callee: identifier 'scope'
+                        arguments: [ literal n.children[0].value ]
+                    for {value: arg}, i in n.children by 2 when i > 0
                         expression =
                             type: 'CallExpression'
                             callee:
-                                if op?
-                                    type: 'MemberExpression'
-                                    computed: no
-                                    object: expression
-                                    property:
-                                        identifier {'.':'dot', '!':'bang'}[op]
-                                else
-                                    identifier 'scope'
-                            arguments: [ literal value ]
-                        op = n.children[i+1]?.value
+                                type: 'MemberExpression'
+                                computed: no
+                                object: expression
+                                property:
+                                    identifier member n.children[i-1].value
+                            arguments: [ literal arg ]
                     expression
                 when 'call_args'
                     for {value} in n.children[1..] by 2 then value
