@@ -150,7 +150,8 @@ suite 'Modules -', ->
                                   Set someVal = 43"""
 
     test 'Dim stub', ->
-        test_foo_close before: 'Dim returnValue As Boolean'
+        test_foo_close before: 'Dim returnValue As Boolean
+                                Dim db As DAO.Database'
 
     test 'assign stub', ->
         test_foo_close before: """foo = "Foo"

@@ -11,7 +11,7 @@ func_defs = func_def*
 func_def = FUNCTION uname args_spec statements END FUNCTION
 args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? on_error?
 statements = statement*
-type_spec = AS uname
+type_spec = AS identifier_expr
 on_error = ONERROR GOTO uname
 
 statement
@@ -25,7 +25,7 @@ statement
     / call_statement
 resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
-dim_statement = DIM uname AS uname
+dim_statement = DIM uname AS identifier_expr
 set_statement = (CONST / SET) uname EQUAL expression
 if_statement = IF expression THEN statements ENDIF
 assign_statement = identifier_expr EQUAL expression
