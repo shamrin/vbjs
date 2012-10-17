@@ -63,6 +63,11 @@ suite 'Modules -', ->
     test 'one line', ->
         run 'DoCmd.Close', 'Close()\n'
 
+    # SKIPPED
+    if 0 then test 'function().property', ->
+        m = runmod """CurrentDb().Properties("StartupForm")"""
+        assert_js m, "scope('CurrentDb')().dot('Properties')('StartupForm');"
+
     test 'nested dot', ->
         assert_js run('DoCmd.Nested.Close'),
                   "scope('DoCmd').dot('Nested').dot('Close')();\n"
