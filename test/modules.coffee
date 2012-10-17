@@ -112,7 +112,8 @@ suite 'Modules -', ->
 
     test 'option stub', ->
         test_foo_close before_func: """Option Compare Database
-                                       Option Explicit"""
+                                       Option Explicit
+                                       ' Options end here"""
 
     test 'function As stub', ->
         test_foo_close after_spec: 'As Boolean'

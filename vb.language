@@ -4,7 +4,7 @@ start
 
 module = _ options func_defs
 
-options = option*
+options = option* _
 option = OPTION [^\r\n]* EOL
 
 func_defs = func_def*
