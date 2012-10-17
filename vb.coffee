@@ -10,20 +10,16 @@ member = (op) -> {'.': 'dot', '!': 'bang'}[op]
 parse = (expr) ->
     tree = parser.parse expr
 
-    # copy-pasted from sqld3/parse_sql.coffee
-    Object.getPrototypeOf(tree).toString = (spaces) ->
-        if not spaces then spaces = ""
+    # first copy-pasted from sqld3/parse_sql.coffee
+    Object.getPrototypeOf(tree).toString = (spaces = '') ->
+        result = try
+                     "=> #{escodegen.generate @value}"
+                 catch error
+                     if @value? then "=> AST: #{repr @value}" else ''
 
-        value = (if this.value? then "=> #{repr this.value}" else '')
-        string = spaces + this.name +  " <" + repr(this.innerText()) + "> " + value
-        children = this.children
-        index = 0
-
-        for child in children
-            if typeof child == "string"
-                #string += "\n" + spaces + ' ' + child
-            else
-                string += "\n" + child.toString(spaces + ' ')
+        string = spaces + "#{@name} <#{repr @innerText()}> " + result
+        for child in @children when typeof child isnt 'string'
+            string += "\n" + child.toString(spaces + ' ')
 
         return string
 
