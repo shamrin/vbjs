@@ -9,7 +9,7 @@ option = OPTION [^\r\n]* EOL
 
 func_defs = func_def*
 func_def = FUNCTION uname args_spec statements END FUNCTION
-args_spec = left_bracket (uname (comma uname)* )? right_bracket type_spec? on_error?
+args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? on_error?
 statements = statement*
 type_spec = AS uname
 on_error = ONERROR GOTO uname
@@ -32,7 +32,7 @@ assign_statement = uname EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_args?
 callee = uname (identifier_op uname)*
-call_args = left_bracket (expression (comma expression)* )? right_bracket
+call_args = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 
 if_condition
     = expression EQUAL expression
@@ -42,7 +42,7 @@ expression
     = expression_in_braces
     / concat_expr
 
-expression_in_braces = LEFT_BRACE expression RIGHT_BRACE
+expression_in_braces = LEFT_PAREN expression RIGHT_PAREN
 
 concat_expr
     = add_expr (concat_op add_expr)*
@@ -52,11 +52,11 @@ add_expr
 
 call_expr
     = lazy_call_expr
-    / name left_bracket (expression (comma expression)* )? right_bracket
+    / name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
     / value
 
 lazy_call_expr
-    = lazy_name left_bracket (lazy_value (comma lazy_value)* )? right_bracket
+    = lazy_name LEFT_PAREN (lazy_value (comma lazy_value)* )? RIGHT_PAREN
 
 lazy_value
     = bracketed_identifier
@@ -89,8 +89,6 @@ literal = '"' literal_text '"' __
 literal_text = [^"]*
 concat_op = '&' __
 plus_op = '+' __
-left_bracket = '(' _
-right_bracket = ')' _
 comma = ',' __
 identifier_op = '!' / '.'
 number = [0-9]+ _
@@ -114,8 +112,8 @@ EQUAL = '=' __
 COLON = ':' _
 TRUE = 'True' _
 FALSE = 'False' _
-LEFT_BRACE = '(' _
-RIGHT_BRACE = ')' _
+LEFT_PAREN = '(' _
+RIGHT_PAREN = ')' _
 keyword
     = 'End'
     / 'Function'
