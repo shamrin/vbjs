@@ -192,11 +192,13 @@ suite 'Modules -', ->
 
     test 'If Or _ stub 2', ->
         test_foo_close before: """
-            If (A = "") Or (B = "") _
-               Or (C = D) Then
+            If (Aa = "") Or (Ba = "") _
+               Or (C <> D) Then
                 E = 0
             End If"""
 
+    test 'If Or CrLf', ->
+        test_foo_close before: 'If A _\r\nOr B Then\r\nC = 0\r\nEnd If'
 
     test 'several functions', ->
         m = runmod """Function Foo()
