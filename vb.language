@@ -16,19 +16,19 @@ func_end
     = END FUNCTION __
     / END SUB __
 args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? EOS
-statements = single_line_statement*
+statements = (single_line_statement / multiline_statement)*
 type_spec = AS identifier_expr
 on_error_statement = ONERROR (GOTO uname / RESUME NEXT)
 
+multiline_statement = if_statement EOS
 single_line_statement = statement EOS
-
 statement
     = resume_statement
     / exit_statement
     / on_error_statement
     / dim_statement
     / set_statement
-    / if_statement
+    / single_line_if_statement
     / assign_statement
     / label_statement
     / call_statement
@@ -37,6 +37,7 @@ exit_statement = EXIT FUNCTION
 dim_statement = DIM uname AS identifier_expr
 set_statement = (CONST / SET) uname EQUAL expression
 if_statement = IF expression THEN EOS statements ENDIF
+single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = uname COLON
 call_statement = callee call_spec?

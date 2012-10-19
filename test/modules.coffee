@@ -174,6 +174,10 @@ suite 'Modules -', ->
                                       DoCmd.DoSomethingElse
                                   End If"""
 
+    test 'If single line stub', ->
+        test_foo_close before: "If IsItReplica() Then DoCmd.TellAboutIt"
+
+
     test 'Condition in braces stub', ->
         test_foo_close before: """If (IsItReplica()) Then
                                       DoCmd.TellAboutIt
