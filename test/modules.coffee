@@ -190,6 +190,14 @@ suite 'Modules -', ->
                 Forms!Startup!HideStartupForm = False
             End If"""
 
+    test 'If Or _ stub 2', ->
+        test_foo_close before: """
+            If (A = "") Or (B = "") _
+               Or (C = D) Then
+                E = 0
+            End If"""
+
+
     test 'several functions', ->
         m = runmod """Function Foo()
                           DoCmd.Open

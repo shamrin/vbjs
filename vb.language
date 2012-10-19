@@ -47,11 +47,9 @@ call_spec
     / call_args
 call_args = (expression (comma expression)* )?
 
-expression
-    = expression_in_braces
-    / or_expr
+expression = or_expr
 
-expression_in_braces = LEFT_PAREN expression RIGHT_PAREN
+braced_expression = LEFT_PAREN expression RIGHT_PAREN
 
 or_expr = cmp_expr (OR cmp_expr)*
 
@@ -65,6 +63,7 @@ add_expr
 
 call_expr
     = lazy_call_expr
+    / braced_expression
     / value
     / plain_call_expr
 
