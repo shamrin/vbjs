@@ -189,9 +189,9 @@ suite 'Modules -', ->
                           DoCmd.Open
                       End Function
                       ' Second function
-                      Function Bar()
+                      Private Sub Bar()
                           DoCmd.Close
-                      End Function"""
+                      End Sub"""
         assert_js m,
             Foo: "scope('DoCmd').dot('Open')();\n"
             Bar: "scope('DoCmd').dot('Close')();\n"

@@ -8,7 +8,13 @@ declarations = declaration* _
 declaration = (OPTION / ATTRIBUTE) [^\r\n]* EOL
 
 func_defs = func_def*
-func_def = FUNCTION uname args_spec statements END FUNCTION
+func_def = func_start uname args_spec statements func_end
+func_start
+    = PRIVATE? FUNCTION
+    / PRIVATE? SUB
+func_end
+    = END FUNCTION
+    / END SUB
 args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? on_error?
 statements = statement*
 type_spec = AS identifier_expr
@@ -101,6 +107,8 @@ number = [0-9]+ _
 uname = !(keyword ![A-Za-z0-9_]) uname_itself _
 uname_itself = [A-Za-z_][A-Za-z0-9_]*
 FUNCTION = 'Function' _
+SUB = 'Sub' _
+PRIVATE = 'Private' _
 END = 'End' __
 OPTION = 'Option' __
 ATTRIBUTE = 'Attribute' __
