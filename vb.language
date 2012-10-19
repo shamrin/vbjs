@@ -13,8 +13,8 @@ func_start
     = PRIVATE? FUNCTION
     / PRIVATE? SUB
 func_end
-    = END FUNCTION __
-    / END SUB __
+    = END FUNCTION EOS
+    / END SUB EOS
 args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? EOS
 statements = single_line_statement*
 type_spec = AS identifier_expr
