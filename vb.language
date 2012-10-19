@@ -5,7 +5,7 @@ start
 module = _ declarations func_defs
 
 declarations = declaration* _
-declaration = (OPTION / ATTRIBUTE) [^\r\n]* EOS
+declaration = (OPTION / ATTRIBUTE) (!EOL)* EOS
 
 func_defs = func_def*
 func_def = func_start uname args_spec statements func_end
