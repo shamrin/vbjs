@@ -34,7 +34,7 @@ statement
     / call_statement
 resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
-dim_statement = DIM uname AS identifier_expr
+dim_statement = (DIM / STATIC) uname AS identifier_expr
 set_statement = (CONST / SET) uname EQUAL expression
 if_statement = IF expression THEN EOS statements ENDIF
 single_line_if_statement = IF expression THEN statement
@@ -120,6 +120,7 @@ RESUME = 'Resume' _
 EXIT = 'Exit' _
 NEXT = 'Next' _
 DIM = 'Dim' _
+STATIC = 'Static' _
 CONST = 'Const' _
 SET = 'Set' _
 IF = 'If' _
