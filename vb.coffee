@@ -6,7 +6,14 @@ pprint = (arg) -> console.log require('util').inspect arg, false, null
 
 member = (op) -> {'.': 'dot', '!': 'bang'}[op]
 
-# parse VB expression or module, and return Parser API AST (for escodegen)
+# Parse VB expression or module, and return Parser API AST [1] for escodegen.
+#
+# Escodegen [2] will translate this AST to JavaScript. To figure out how to
+# construct a certain JavaScript fragment, use parser demo [3].
+#
+# [1]: https://developer.mozilla.org/en/SpiderMonkey/Parser_API
+# [2]: https://github.com/Constellation/escodegen
+# [3]: http://esprima.org/demo/parse.html
 parse = (expr) ->
     tree = parser.parse expr
 
