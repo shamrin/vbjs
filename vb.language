@@ -5,7 +5,7 @@ start
 module = _ declarations func_defs
 
 declarations = declaration* _
-declaration = (OPTION / ATTRIBUTE) [^\r\n]* EOL
+declaration = (OPTION / ATTRIBUTE) [^\r\n]* EOS
 
 func_defs = func_def*
 func_def = func_start uname args_spec statements func_end
@@ -139,5 +139,8 @@ keyword
     / 'Or'
 AS = 'As' __
 
+line_continuation = __ '_' __ &EOL
+
 EOF = !.
+EOS = !line_continuation __ (EOL / comment EOL)*
 EOL = [\r\n]+ / EOF
