@@ -18,7 +18,7 @@ func_end
 args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? EOS
 statements = single_line_statement*
 type_spec = AS identifier_expr
-on_error_statement = ONERROR GOTO uname
+on_error_statement = ONERROR (GOTO uname / RESUME NEXT)
 
 single_line_statement = statement EOS
 
@@ -117,6 +117,7 @@ ONERROR = 'On' [ \t]+ 'Error' _
 GOTO = 'GoTo' _
 RESUME = 'Resume' _
 EXIT = 'Exit' _
+NEXT = 'Next' _
 DIM = 'Dim' _
 CONST = 'Const' _
 SET = 'Set' _

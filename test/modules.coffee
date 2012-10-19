@@ -122,12 +122,10 @@ suite 'Modules -', ->
     test 'function As stub', ->
         test_foo_close after_spec: 'As Boolean'
 
-    test 'function As Error stub', ->
-        test_foo_close
-            after_spec: 'As Boolean'
-            before: 'On Error GoTo LabelName'
+    test 'function Error Resume stub', ->
+        test_foo_close before: 'On Error Resume Next'
 
-    test 'function Error stub', ->
+    test 'function Error GoTo stub', ->
         test_foo_close before: 'On Error GoTo LabelName'
 
     test 'Resume stub', ->
