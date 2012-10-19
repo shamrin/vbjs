@@ -36,7 +36,7 @@ resume_statement = RESUME uname
 exit_statement = EXIT FUNCTION
 dim_statement = (DIM / STATIC) uname AS identifier_expr
 set_statement = (CONST / SET) uname EQUAL expression
-if_statement = IF expression THEN EOS statements ENDIF
+if_statement = IF expression THEN EOS statements (ELSE statements)? ENDIF
 single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = uname COLON
@@ -124,6 +124,7 @@ CONST = 'Const' _
 SET = 'Set' _
 IF = 'If' _
 THEN = 'Then' _
+ELSE = 'Else' _
 ENDIF = END IF _
 EQUAL = '=' _
 NOT_EQUAL = '<>' _
