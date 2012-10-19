@@ -15,10 +15,12 @@ func_start
 func_end
     = END FUNCTION
     / END SUB
-args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? on_error?
-statements = statement*
+args_spec = LEFT_PAREN (uname (comma uname)* )? RIGHT_PAREN type_spec? on_error? EOS
+statements = single_line_statement*
 type_spec = AS identifier_expr
 on_error = ONERROR GOTO uname
+
+single_line_statement = statement EOS
 
 statement
     = resume_statement
@@ -36,9 +38,12 @@ set_statement = (CONST / SET) uname EQUAL expression
 if_statement = IF expression THEN statements ENDIF
 assign_statement = identifier_expr EQUAL expression
 label_statement = uname COLON
-call_statement = callee call_args?
+call_statement = callee call_spec?
 callee = uname (identifier_op uname)*
-call_args = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
+call_spec
+    = LEFT_PAREN call_args RIGHT_PAREN
+    / call_args
+call_args = (expression (comma expression)* )?
 
 expression
     = expression_in_braces
@@ -83,24 +88,19 @@ identifier_expr_part
     = plain_call_expr
     / identifier
 
-_ = ( [ \t\r\n] / comment / '_')*
-__ = [ \t]*
-
-comment = "'" [^\r\n]*
-
 identifier
     = bracketed_identifier
     / uname
-bracketed_identifier = '[' name_in_brackets ']' __
+bracketed_identifier = '[' name_in_brackets ']' _
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
 name = [A-Za-z_][A-Za-z0-9_]* _
 
-lazy_name = 'Sum'
+lazy_name = 'Sum' _
 literal = '"' literal_text '"' _
 literal_text = [^"]*
-concat_op = '&' __
-plus_op = '+' __
-comma = ',' __
+concat_op = '&' _
+plus_op = '+' _
+comma = ',' _
 identifier_op = '!' / '.'
 number = [0-9]+ _
 
@@ -109,20 +109,20 @@ uname_itself = [A-Za-z_][A-Za-z0-9_]*
 FUNCTION = 'Function' _
 SUB = 'Sub' _
 PRIVATE = 'Private' _
-END = 'End' __
-OPTION = 'Option' __
-ATTRIBUTE = 'Attribute' __
-ONERROR = 'On' [ \t]+ 'Error' __
-GOTO = 'GoTo' __
-RESUME = 'Resume' __
-EXIT = 'Exit' __
-DIM = 'Dim' __
-CONST = 'Const' __
-SET = 'Set' __
-IF = 'If' __
+END = 'End' _
+OPTION = 'Option' _
+ATTRIBUTE = 'Attribute' _
+ONERROR = 'On' [ \t]+ 'Error' _
+GOTO = 'GoTo' _
+RESUME = 'Resume' _
+EXIT = 'Exit' _
+DIM = 'Dim' _
+CONST = 'Const' _
+SET = 'Set' _
+IF = 'If' _
 THEN = 'Then' _
 ENDIF = END IF _
-EQUAL = '=' __
+EQUAL = '=' _
 COLON = ':' _
 TRUE = 'True' _
 FALSE = 'False' _
@@ -137,10 +137,14 @@ keyword
     / 'Set'
     / 'Const'
     / 'Or'
-AS = 'As' __
+AS = 'As' _
 
-line_continuation = __ '_' __ &EOL
+// optional whitespace
+_ = ([ \t] / line_continuation)*
 
+comment = _ "'" [^\r\n]* EOL
+line_continuation = '_' _ EOL
+
+EOS = (!('_' _) EOL / comment)+
+EOL = [\r\n] / EOF
 EOF = !.
-EOS = !line_continuation __ (EOL / comment EOL)*
-EOL = [\r\n]+ / EOF
