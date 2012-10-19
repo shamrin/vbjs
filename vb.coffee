@@ -123,6 +123,8 @@ parse = (expr) ->
                 when 'statements'
                     for {value} in n.children when value?
                         value
+                when 'single_line_statement'
+                    n.children[0].value
                 when 'statement'
                     n.children[0].value
                 when 'exit_statement'
@@ -150,8 +152,10 @@ parse = (expr) ->
                                     identifier member n.children[i-1].value
                             arguments: [ literal arg ]
                     expression
+                when 'call_spec'
+                    n.children[1]?.value ? n.children[0].value
                 when 'call_args'
-                    for {value} in n.children[1..] by 2 then value
+                    for {value} in n.children by 2 then value
                 when 'uname'
                     n.children[0].value
                 when 'uname_itself'
