@@ -77,6 +77,10 @@ suite 'Modules -', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
             'OpenForm("Main Switchboard")\n'
 
+    test 'arguments without braces', ->
+        run 'DoCmd.OpenForm "Main Switchboard"',
+            'OpenForm("Main Switchboard")\n'
+
     test 'numbers', ->
         run 'DoCmd.Foo (1, 23, 456)',
             'Foo(1,23,456)\n'
