@@ -2,10 +2,10 @@ start
     = module EOF
     / expression EOF
 
-module = _ options func_defs
+module = _ declarations func_defs
 
-options = option* _
-option = OPTION [^\r\n]* EOL
+declarations = declaration* _
+declaration = (OPTION / ATTRIBUTE) [^\r\n]* EOL
 
 func_defs = func_def*
 func_def = FUNCTION uname args_spec statements END FUNCTION
@@ -103,6 +103,7 @@ uname_itself = [A-Za-z_][A-Za-z0-9_]*
 FUNCTION = 'Function' _
 END = 'End' __
 OPTION = 'Option' __
+ATTRIBUTE = 'Attribute' __
 ONERROR = 'On' [ \t]+ 'Error' __
 GOTO = 'GoTo' __
 RESUME = 'Resume' __

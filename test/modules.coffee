@@ -195,3 +195,6 @@ suite 'Modules -', ->
         assert_js m,
             Foo: "scope('DoCmd').dot('Open')();\n"
             Bar: "scope('DoCmd').dot('Close')();\n"
+
+    test 'attribute stub', ->
+        test_foo_close before_func: """Attribute VB_Exposed = False"""
