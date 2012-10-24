@@ -48,35 +48,19 @@ call_spec
 call_args = (expression (comma expression)* )?
 
 expression = or_expr
-
-braced_expression = LEFT_PAREN expression RIGHT_PAREN
-
 or_expr = cmp_expr (OR cmp_expr)*
-
 cmp_expr = concat_expr ((EQUAL / NOT_EQUAL) concat_expr)?
-
-concat_expr
-    = add_expr (concat_op add_expr)*
-
-add_expr
-    = call_expr (plus_op call_expr)*
-
+concat_expr = add_expr (concat_op add_expr)*
+add_expr = call_expr (plus_op call_expr)*
 call_expr
-    = lazy_call_expr
-    / braced_expression
+    = braced_expression
     / value
     / plain_call_expr
+braced_expression = LEFT_PAREN expression RIGHT_PAREN
 
 plain_call_expr
     = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 
-lazy_call_expr
-    = lazy_name LEFT_PAREN (lazy_value (comma lazy_value)* )? RIGHT_PAREN
-
-lazy_value
-    = bracketed_identifier
-    / literal
-    
 value
     = identifier_expr
     / literal
@@ -96,7 +80,6 @@ bracketed_identifier = '[' name_in_brackets ']' _
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
 name = [A-Za-z_][A-Za-z0-9_]* _
 
-lazy_name = 'Sum' _
 literal = '"' literal_text '"' _
 literal_text = [^"]*
 concat_op = '&' _
