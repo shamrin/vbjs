@@ -1,4 +1,4 @@
-parser = require "./parser"
+parser = require "./vb.parser"
 escodegen = require "escodegen"
 
 repr = (arg) -> require('util').format '%j', arg

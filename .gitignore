@@ -1,2 +1,2 @@
-/parser.js
-/test/pegjs_parser.js
+/*.parser.js
+/test/*.peg.js
