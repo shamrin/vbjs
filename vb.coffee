@@ -1,5 +1,6 @@
-parser = require "./vb.parser"
 escodegen = require "escodegen"
+vb_parser = require "./vb.parser"
+expr_parser = require "./expr.parser"
 
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
@@ -14,7 +15,8 @@ member = (op) -> {'.': 'dot', '!': 'bang'}[op]
 # [1]: https://developer.mozilla.org/en/SpiderMonkey/Parser_API
 # [2]: https://github.com/Constellation/escodegen
 # [3]: http://esprima.org/demo/parse.html
-parse = (expr) ->
+parse = (source_type, expr) ->
+    parser = {'vb': vb_parser, 'expr': expr_parser}[source_type]
     tree = parser.parse expr
 
     # first copy-pasted from sqld3/parse_sql.coffee
@@ -164,7 +166,7 @@ parse = (expr) ->
             #if n.name is 'start' then console.log n.toString()
 
     if not tree.value? and process?.env?.TESTING?
-        require('./test/pegjs_parser').check '<string>', expr
+        require("./test/#{source_type}.peg.js").check '<string>', expr
 
     #pprint tree
     tree.value
@@ -197,10 +199,10 @@ generate = (tree) ->
     new Function 'me', 'us', 'fn', body
 
 exports.compile = (expr) ->
-    generate parse expr
+    generate parse 'expr', expr
 
 exports.evaluate = (expr, me, us, fns) ->
-    tree = parse expr
+    tree = parse 'expr', expr
     if tree?
         js = generate tree
         fn_get = (name) ->
@@ -217,7 +219,7 @@ exports.evaluate = (expr, me, us, fns) ->
         'Error parsing ' + expr
 
 exports.loadmodule = (code, scope) ->
-    tree = parse code
+    tree = parse 'vb', code
     if tree?
         #console.log 'TREE:'
         #pprint tree

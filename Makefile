@@ -7,7 +7,7 @@
 test/%.peg.js: %.language test/pegjs_build
 	test/pegjs_build $< $@
 
-test: test/vb.peg.js vb.parser.js
+test: test/vb.peg.js vb.parser.js test/expr.peg.js expr.parser.js
     # Usage:
     #     $ make test TEST="grep pattern"
     ifdef TEST
