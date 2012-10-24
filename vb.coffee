@@ -36,9 +36,8 @@ parse = (expr) ->
             n.value = switch n.name
                 when '#document', 'source' # language.js nodes
                     n.children?[0]?.value
-                when 'start'
-                    n.children[1].value
-                when 'expression', 'value', 'identifier', 'identifier_expr_part'
+                when 'start', 'expression', 'value', \
+                         'identifier', 'identifier_expr_part'
                     n.children[0].value
                 when 'literal'
                     literal n.children[1].value
@@ -198,10 +197,10 @@ generate = (tree) ->
     new Function 'me', 'us', 'fn', body
 
 exports.compile = (expr) ->
-    generate parse 'E' + expr
+    generate parse expr
 
 exports.evaluate = (expr, me, us, fns) ->
-    tree = parse 'E' + expr
+    tree = parse expr
     if tree?
         js = generate tree
         fn_get = (name) ->
@@ -217,9 +216,8 @@ exports.evaluate = (expr, me, us, fns) ->
     else
         'Error parsing ' + expr
 
-# load VBA module and return object with VB functions, compiled to JavaScript
 exports.loadmodule = (code, scope) ->
-    tree = parse 'M' + code
+    tree = parse code
     if tree?
         #console.log 'TREE:'
         #pprint tree

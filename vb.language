@@ -1,6 +1,6 @@
 start
-    = 'M' module EOF
-    / 'E' expression EOF
+    = module EOF
+    / expression EOF
 
 module = __ declarations func_defs
 
