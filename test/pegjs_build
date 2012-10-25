@@ -12,30 +12,35 @@ print_error = (filename, source, error) ->
                   else
                       ""
 
-    console.log """File #{filename}, line #{error.line ? '?'}
-                   #{marked_line}
-                   #{error.name}: #{error.message}"""
+    console.error """File #{filename}, line #{error.line ? '?'}
+                     #{marked_line}
+                     #{error.name}: #{error.message}"""
 
-[grammarfile, outputfile] = process.argv[2..]
+read = (cb) ->
+    process.stdin.resume()
+    process.stdin.setEncoding 'utf8'
 
-unless grammarfile? and outputfile?
-    console.log "usage: ./pegjs_build <grammarfile> <outputfile>"
+    data = ''
+    process.stdin.on 'data', (chunk) -> data += chunk
+    process.stdin.on 'end', -> cb data
+
+if process.argv[2] in ['-h', '--help']
+    console.log "usage: cat <grammarfile> | ./pegjs_build > <outputfile>"
     process.exit 2
 
-grammar = fs.readFileSync grammarfile, 'utf8'
-try
-    parser = pegjs.buildParser grammar
-catch error
-    print_error grammarfile, grammar, error
-    process.exit 1
+read (grammar) ->
+    try
+        parser = pegjs.buildParser grammar
+    catch error
+        print_error process.argv[2] ? '<stdin>', grammar, error
+        process.exit 1
 
-fs.writeFileSync outputfile,
-                 """var parser = #{parser.toSource()};
-                    var print_error = #{print_error.toString()};
-                    exports.check = function(filename, source) {
-                        try {
-                            parser.parse(source);
-                        } catch (error) {
-                            print_error(filename, source, error);
-                        }
-                    };"""
+    process.stdout.write """var parser = #{parser.toSource()};
+                            var print_error = #{print_error.toString()};
+                            exports.check = function(filename, source) {
+                                try {
+                                    parser.parse(source);
+                                } catch (error) {
+                                    print_error(filename, source, error);
+                                }
+                            };"""

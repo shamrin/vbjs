@@ -1,0 +1,41 @@
+concat_expr = add_expr (concat_op add_expr)*
+add_expr = call_expr (plus_op call_expr)*
+
+braced_expression = LEFT_PAREN expression RIGHT_PAREN
+
+plain_call_expr
+    = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
+
+value
+    = identifier_expr
+    / literal
+    / TRUE
+    / FALSE
+    / number
+
+identifier_expr = identifier_expr_part (identifier_op identifier_expr_part)*
+identifier_expr_part
+    = plain_call_expr
+    / identifier
+
+identifier
+    = bracketed_identifier
+    / name
+bracketed_identifier = '[' name_in_brackets ']' _
+name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
+literal = '"' literal_text '"' _
+literal_text = [^"]*
+concat_op = '&' _
+plus_op = '+' _
+comma = ',' _
+identifier_op = '!' / '.'
+number = [0-9]+ _
+
+TRUE = 'True' _
+FALSE = 'False' _
+LEFT_PAREN = '(' _
+RIGHT_PAREN = ')' _
+
+EOF = !.
+
+name_itself = [A-Za-z_][A-Za-z0-9_]*

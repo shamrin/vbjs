@@ -72,7 +72,7 @@ parse = (source_type, expr) ->
                     n.innerText()
                 when 'bracketed_identifier'
                     literal n.children[1].value
-                when 'name', 'name_in_brackets', 'lazy_name'
+                when 'name_itself', 'name_in_brackets', 'lazy_name'
                     n.innerText()
                 when 'or_expr', 'cmp_expr'
                     n.children[0].value # FIXME it's just a stub now
@@ -158,10 +158,8 @@ parse = (source_type, expr) ->
                     n.children[1]?.value ? n.children[0].value
                 when 'call_args'
                     for {value} in n.children by 2 then value
-                when 'uname'
+                when 'name'
                     n.children[0].value
-                when 'uname_itself'
-                    n.innerText()
 
             #if n.name is 'start' then console.log n.toString()
 

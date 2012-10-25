@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+"""Replace '{{include <filename>}}' lines with <filename>.language content"""
+
+import sys
+import re
+
+for line in sys.stdin:
+    m = re.match(r'{{\s*include\s+([^}]+)}}\s*$', line)
+    if m:
+        sys.stdout.write(open(m.group(1).rstrip() + '.language').read())
+    else:
+        sys.stdout.write(line)
