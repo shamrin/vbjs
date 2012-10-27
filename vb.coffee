@@ -22,10 +22,12 @@ common_node_value = (n) ->
       for {value}, i in n.children by 2
           result = if result? then plus result, value else value
       result
-    when 'start', 'value', 'identifier', 'identifier_expr_part'
+    when 'start', 'value', 'identifier_expr_part'
       n.children[0].value
+    when 'identifier'
+      literal n.children[0].value
     when 'bracketed_identifier'
-      literal n.children[1].value
+      n.children[1].value
     when 'name_itself', 'name_in_brackets', 'lazy_name'
       n.innerText()
     when 'literal'

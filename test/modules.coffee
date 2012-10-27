@@ -64,6 +64,15 @@ suite 'Modules -', ->
     test 'one line', ->
         run 'DoCmd.Close', 'Close()\n'
 
+    test 'bracketed', ->
+        m = runmod """Function Foo()
+                        Me.Parent![Customer Orders].Requery
+                        DoCmd.Close
+                      End Function"""
+        assert_js m,
+            Foo: """ns('Me').dot('Parent').bang('Customer Orders').dot('Requery')();
+                    ns('DoCmd').dot('Close')();\n"""
+
     # SKIPPED
     if 0 then test 'function().property', ->
         m = runmod """CurrentDb().Properties("StartupForm")"""

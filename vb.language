@@ -55,7 +55,9 @@ call_expr
     / value
     / plain_call_expr
 
-name = !(keyword ![A-Za-z0-9_]) name_itself _
+name
+    = !(keyword ![A-Za-z0-9_]) name_itself _
+    / bracketed_identifier
 
 // optional whitespace
 _ = ([ \t] / line_continuation)*
