@@ -3,8 +3,14 @@ assert = require 'assert'
 
 run = (expr, me={}, us={}, fns={}) ->
     namespace =
-        _Us: us
-        Me: dot: (name) -> me[name]
+        _Us: dot: (name) ->
+                    unless us[name]?
+                      throw new VBRuntimeError "'#{name}' not found in a _Us"
+                    us[name]
+        Me: dot: (name) ->
+                    unless me[name]?
+                      throw new VBRuntimeError "'#{name}' not found in a Me"
+                    me[name]
     for k, v of fns
         namespace[k] = v
     evaluate expr, namespace
@@ -18,7 +24,7 @@ fns =
         # TODO implement Sum in VBA, using CurrentDb.OpenRecordset or DBEngine
         field = {'[Field]': 'Field'}[expr]
         sum = 0
-        for val in ns('_Us')[field] then sum += val
+        for val in ns('_Us').dot(field) then sum += val
         sum
 
 suite 'Expressions -', ->
