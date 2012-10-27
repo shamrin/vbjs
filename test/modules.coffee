@@ -55,7 +55,7 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
     m = runmod """#{before_func}Function Foo() #{after_spec}
                     #{before}DoCmd.Close
                     #{after}End Function"""
-    assert_js m, Foo: "scope('DoCmd').dot('Close')();\n"
+    assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -67,11 +67,11 @@ suite 'Modules -', ->
     # SKIPPED
     if 0 then test 'function().property', ->
         m = runmod """CurrentDb().Properties("StartupForm")"""
-        assert_js m, Foo: "scope('CurrentDb')().dot('Properties')('StartupForm');"
+        assert_js m, Foo: "ns('CurrentDb')().dot('Properties')('StartupForm');"
 
     test 'nested dot', ->
         assert_js run('DoCmd.Nested.Close'),
-                  Foo: "scope('DoCmd').dot('Nested').dot('Close')();\n"
+                  Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
@@ -109,7 +109,7 @@ suite 'Modules -', ->
 
     test 'leading empty line', ->
         m = runmod "\nFunction Foo()\nDoCmd.Close\nEnd Function"
-        assert_js m, Foo: "scope('DoCmd').dot('Close')();\n"
+        assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'empty module', ->
         runmod ''
@@ -209,8 +209,8 @@ suite 'Modules -', ->
                           DoCmd.Close
                       End Sub"""
         assert_js m,
-            Foo: "scope('DoCmd').dot('Open')();\n"
-            Bar: "scope('DoCmd').dot('Close')();\n"
+            Foo: "ns('DoCmd').dot('Open')();\n"
+            Bar: "ns('DoCmd').dot('Close')();\n"
 
     test 'attribute stub', ->
         test_foo_close before_func: """Attribute VB_Exposed = False"""

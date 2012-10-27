@@ -87,7 +87,7 @@ vb_node_value = (n) ->
     when 'callee'
       expression =
         type: 'CallExpression'
-        callee: identifier 'scope'
+        callee: identifier 'ns'
         arguments: [ literal n.children[0].value ]
       for {value: arg}, i in n.children by 2 when i > 0
         expression =
@@ -218,22 +218,22 @@ exports.evaluate = (expr, ns) ->
     else
         'Error parsing ' + expr
 
-exports.loadmodule = (code, scope) ->
+exports.loadmodule = (code, ns) ->
     tree = parse 'vb', code
     if tree?
         #console.log 'TREE:'
         #pprint tree
         body = "return #{escodegen.generate tree};"
         try
-            func = new Function 'scope', body
+            func = new Function 'ns', body
         catch error
             console.log "#{error} in `#{body}`"
             throw error
         #console.log 'CODE =', "`" + func + "`"
         func (name) ->
-                unless scope[name]?
+                unless ns[name]?
                     throw new VBRuntimeError "VB name '#{name}' not found"
-                scope[name]
+                ns[name]
     else
         throw "Error parsing module '#{code[..150]}...'"
 
