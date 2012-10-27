@@ -184,14 +184,14 @@ plus = (left, right) ->
     left: left
     right: right
 
-# fn("`func_name`")(me, us, `args`...)
+# ns("`func_name`")(ns, `args`...)
 call = (func_name, args) ->
     type: 'CallExpression'
     callee:
         type: 'CallExpression'
-        callee: identifier 'fn'
+        callee: identifier 'ns'
         arguments: [literal func_name]
-    arguments: [identifier('me'), identifier('us')].concat args
+    arguments: [identifier('ns')].concat args
 
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
@@ -200,27 +200,21 @@ identifier = (name) -> type: 'Identifier', name: name
 generate = (tree) ->
     #console.log 'TREE:'
     #pprint tree
-    body = "return #{escodegen.generate tree};"
+    body = "var me = ns('Me').dot; return #{escodegen.generate tree};"
     #console.log 'CODE =', "`" + body + "`"
-    new Function 'me', 'us', 'fn', body
+    new Function 'ns', body
 
 exports.compile = (expr) ->
     generate parse 'expr', expr
 
-exports.evaluate = (expr, me, us, fns) ->
+exports.evaluate = (expr, ns) ->
     tree = parse 'expr', expr
     if tree?
         js = generate tree
-        fn_get = (name) ->
-                 unless fns[name]?
-                     throw new VBRuntimeError "VB function '#{name}' not found"
-                 (args...) -> fns[name](args...)
-        [me_get, us_get] = for obj in [me, us] then do (obj) ->
-            (field) ->
-                unless obj[field]?
-                    throw new VBRuntimeError "VB field '#{field}' not found"
-                obj[field]
-        js me_get, us_get, fn_get
+        js (name) ->
+            unless ns[name]?
+                throw new VBRuntimeError "'#{name}' not found in a namespace"
+            ns[name]
     else
         'Error parsing ' + expr
 

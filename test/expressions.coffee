@@ -1,16 +1,24 @@
 {evaluate, compile, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
-run = (expr, me={}, us={}, fns={}) -> evaluate expr, me, us, fns
+run = (expr, me={}, us={}, fns={}) ->
+    namespace =
+        _Us: us
+        Me: dot: (name) -> me[name]
+    for k, v of fns
+        namespace[k] = v
+    evaluate expr, namespace
+
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
 fns =
-    Abs: (me, us, expr) -> Math.abs(expr)
-    Sum: (me, us, expr) ->
+    Abs: (ns, expr) -> Math.abs(expr)
+    Sum: (ns, expr) ->
+        # TODO implement Sum in VBA, using CurrentDb.OpenRecordset or DBEngine
         field = {'[Field]': 'Field'}[expr]
         sum = 0
-        for val in us(field) then sum += val
+        for val in ns('_Us')[field] then sum += val
         sum
 
 suite 'Expressions -', ->
@@ -44,5 +52,5 @@ suite 'Expressions -', ->
     test 'unknown us.field error', ->
         assert.throws (-> run 'Sum([Field])', {}, {}, fns), VBRuntimeError
     test 'generated code', ->
-        eq "function anonymous(me,us,fn) {\nreturn me('Field');\n}",
+        eq "function anonymous(ns) {\nvar me = ns('Me').dot; return me('Field');\n}",
            compile('[Field]').toString()
