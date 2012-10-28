@@ -105,6 +105,24 @@ vb_node_value = (n) ->
       n.children[1]?.value ? n.children[0].value
     when 'call_args'
       for {value} in n.children by 2 then value
+    when 'identifier_expr'
+      # [A].[B]![C] => ns('A').dot('B').bang('C')
+      result = n.children[0].value
+      if result.type is 'Literal'
+        result =
+          type: 'CallExpression'
+          callee: identifier 'ns'
+          arguments: [ result ]
+      for {value: arg}, i in n.children by 2 when i > 0
+        result =
+          type: 'CallExpression'
+          callee:
+            type: 'MemberExpression'
+            computed: no
+            object: result
+            property: identifier member n.children[i-1].value
+          arguments: [ arg ]
+      result
 
 expr_node_value = (n) ->
   switch n.name

@@ -90,6 +90,10 @@ suite 'Modules -', ->
         run 'DoCmd.OpenForm "Main Switchboard"',
             'OpenForm("Main Switchboard")\n'
 
+    test 'dotted argument', ->
+        assert_js run('MsgBox A.B'),
+                  Foo: "ns('MsgBox')(ns('A').dot('B'));\n"
+
     test 'numbers', ->
         run 'DoCmd.Foo (1, 23, 456)',
             'Foo(1,23,456)\n'
