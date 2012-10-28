@@ -32,7 +32,7 @@ statement
     / label_statement
     / call_statement
 resume_statement = RESUME name
-exit_statement = EXIT FUNCTION
+exit_statement = EXIT (FUNCTION / SUB)
 dim_statement = (DIM / STATIC) name AS identifier_expr
 set_statement = (CONST / SET) name EQUAL expression
 if_statement = IF expression THEN EOS statements (ELSE statements)? ENDIF
