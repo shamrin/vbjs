@@ -25,6 +25,7 @@ single_line_statement = statement EOS
 statement
     = resume_statement
     / exit_statement
+    / goto_statement
     / on_error_statement
     / dim_statement
     / set_statement
@@ -34,6 +35,7 @@ statement
     / call_statement
 resume_statement = RESUME name
 exit_statement = EXIT (FUNCTION / SUB)
+goto_statement = GOTO name
 dim_statement = (DIM / STATIC) name AS identifier_expr
 set_statement = (CONST / SET) name EQUAL expression
 if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF

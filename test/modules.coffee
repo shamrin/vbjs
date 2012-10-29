@@ -167,6 +167,9 @@ suite 'Modules -', ->
                    DoCmd.HandleError
                    Resume FooExit""", 'Close()\n'
 
+    test 'plain GoTo stub', ->
+      test_foo_close after: 'GoTo LabelName'
+
     test 'Const Set stub', ->
         test_foo_close before: """Const someConst = 42
                                   Set someVal = 43"""
