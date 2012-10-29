@@ -126,6 +126,8 @@ vb_node_value = (n) ->
             property: identifier member n.children[i-1].value
           arguments: [ arg ]
       result
+    when 'not_expr'
+      n.children[1]?.value ? n.children[0].value  # FIXME it's just a stub now
 
 expr_node_value = (n) ->
   switch n.name

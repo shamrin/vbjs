@@ -36,7 +36,7 @@ resume_statement = RESUME name
 exit_statement = EXIT (FUNCTION / SUB)
 dim_statement = (DIM / STATIC) name AS identifier_expr
 set_statement = (CONST / SET) name EQUAL expression
-if_statement = IF expression THEN EOS statements (ELSE statements)? ENDIF
+if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF
 single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = name COLON
@@ -48,7 +48,8 @@ call_spec
 call_args = (expression (comma expression)* )?
 
 expression = or_expr
-or_expr = cmp_expr (OR cmp_expr)*
+or_expr = not_expr (OR not_expr)*
+not_expr = NOT? cmp_expr
 cmp_expr = concat_expr ((EQUAL / NOT_EQUAL) concat_expr)?
 
 call_expr
@@ -98,6 +99,7 @@ ELSE = 'Else' _
 ENDIF = END IF _
 EQUAL = '=' _
 NOT_EQUAL = '<>' _
+NOT = 'Not' _
 COLON = ':' _
 OR = 'Or' _
 keyword
@@ -116,4 +118,5 @@ keyword
     / 'GoTo'
     / 'Option'
     / 'Attribute'
+    / 'Not'
 AS = 'As' _

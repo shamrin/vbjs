@@ -186,6 +186,11 @@ suite 'Modules -', ->
                                      Resume FooExit
                                  End If"""
 
+    test 'If Not stub', ->
+        test_foo_close before: """If Not IsNull(Me!Photo) Then
+                                  hideImageFrame
+                                 End If"""
+
     test 'If Else stub', ->
         test_foo_close before: """If IsItReplica() Then
                                       DoCmd.TellAboutIt
