@@ -103,9 +103,17 @@ OR = 'Or' _
 keyword
     = 'End'
     / 'Function'
-    / 'Then'
+    / 'Sub'
+    / 'Private'
     / 'If'
+    / 'Then'
+    / 'Else'
     / 'Set'
     / 'Const'
     / 'Or'
+    / 'Dim'
+    / 'Static'
+    / 'GoTo'
+    / 'Option'
+    / 'Attribute'
 AS = 'As' _
