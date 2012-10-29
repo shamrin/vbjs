@@ -14,7 +14,8 @@ func_start
 func_end
     = END FUNCTION __
     / END SUB __
-args_spec = LEFT_PAREN (name (comma name)* )? RIGHT_PAREN type_spec? EOS
+args_spec = LEFT_PAREN (arg_spec (comma arg_spec)* )? RIGHT_PAREN type_spec? EOS
+arg_spec = name type_spec
 statements = (single_line_statement / multiline_statement)*
 type_spec = AS identifier_expr
 on_error_statement = ONERROR (GOTO name / RESUME NEXT)
