@@ -42,6 +42,9 @@ common_node_value = (n) ->
       n.children[0].value
     when 'name'
       n.children[0].value
+    when 'plain_call_expr'
+      [{value: fn}, l, params..., r] = n.children
+      call(fn, for {value} in params by 2 then value)
 
 vb_node_value = (n) ->
   switch n.name
@@ -126,9 +129,6 @@ vb_node_value = (n) ->
 
 expr_node_value = (n) ->
   switch n.name
-    when 'plain_call_expr'
-      [{value: fn}, l, params..., r] = n.children
-      call(fn, for {value} in params by 2 then value)
     when 'identifier_expr'
       # [A].[B]![C] => me('A').dot('B').bang('C')
       # About bang ! operator semantics:
