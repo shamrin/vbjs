@@ -127,10 +127,12 @@ suite 'Modules -', ->
     test 'empty module', ->
         runmod ''
 
-    test 'option stub', ->
+    test 'declarations stub', ->
         test_foo_close before_func: """Option Compare Database
                                        Option Explicit
-                                       ' Options end here"""
+                                       Attribute VB_Exposed = False
+                                       Dim path As String
+                                       ' Decrarations end here"""
 
     test 'function As stub', ->
         test_foo_close after_spec: 'As Boolean'
@@ -225,5 +227,3 @@ suite 'Modules -', ->
             Foo: "ns('DoCmd').dot('Open')();\n"
             Bar: "ns('DoCmd').dot('Close')();\n"
 
-    test 'attribute stub', ->
-        test_foo_close before_func: """Attribute VB_Exposed = False"""
