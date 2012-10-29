@@ -1,7 +1,7 @@
-{{include common}}
-
 start = expression EOF
 expression = concat_expr
+
+{{include common}}
 
 call_expr
     = lazy_call_expr

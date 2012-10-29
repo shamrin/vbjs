@@ -1,7 +1,7 @@
-{{include common}}
-
 start = module EOF
 module = __ declarations func_defs
+
+{{include common}}
 
 declarations = declaration* _
 declaration = (OPTION / ATTRIBUTE / DIM) [^\r\n]* EOS
