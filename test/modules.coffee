@@ -52,10 +52,11 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
     unless after_spec?
         after_spec = ''
 
-    m = runmod """#{before_func}Function Foo() #{after_spec}
-                    #{before}DoCmd.Close
-                    #{after}End Function"""
-    assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
+    code = """#{before_func}Function Foo() #{after_spec}
+                #{before}DoCmd.Close
+                #{after}End Function"""
+
+    assert_js runmod(code), Foo: "ns('DoCmd').dot('Close')();\n"
 
 suite 'Modules -', ->
     test 'empty', ->
