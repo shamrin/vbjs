@@ -167,6 +167,11 @@ suite 'Modules -', ->
                    DoCmd.HandleError
                    Resume FooExit""", 'Close()\n'
 
+    test 'With stub', ->
+      test_foo_close after: """With Application.FileDialog(msoFileDialogFilePicker)
+                                 .Title = "Name"
+                               End With"""
+
     test 'plain GoTo stub', ->
       test_foo_close after: 'GoTo LabelName'
 

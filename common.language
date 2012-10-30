@@ -13,7 +13,7 @@ value
     / FALSE
     / number
 
-identifier_expr = identifier_expr_part (identifier_op identifier_expr_part)*
+identifier_expr_itself = identifier_expr_part (identifier_op identifier_expr_part)*
 identifier_expr_part
     = plain_call_expr
     / identifier

@@ -22,7 +22,7 @@ common_node_value = (n) ->
       for {value}, i in n.children by 2
           result = if result? then plus result, value else value
       result
-    when 'start', 'value', 'identifier_expr_part'
+    when 'start', 'value', 'identifier_expr', 'identifier_expr_part'
       n.children[0].value
     when 'identifier'
       literal n.children[0].value
@@ -108,7 +108,7 @@ vb_node_value = (n) ->
       n.children[1]?.value ? n.children[0].value
     when 'call_args'
       for {value} in n.children by 2 then value
-    when 'identifier_expr'
+    when 'identifier_expr_itself'
       # [A].[B]![C] => ns('A').dot('B').bang('C')
       result = n.children[0].value
       if result.type is 'Literal'
@@ -131,7 +131,7 @@ vb_node_value = (n) ->
 
 expr_node_value = (n) ->
   switch n.name
-    when 'identifier_expr'
+    when 'identifier_expr_itself'
       # [A].[B]![C] => me('A').dot('B').bang('C')
       # About bang ! operator semantics:
       #   * http://stackoverflow.com/q/4804947
