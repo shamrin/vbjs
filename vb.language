@@ -43,12 +43,11 @@ if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF
 single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = name COLON
-call_statement = callee call_spec?
+
+// [MS-VBAL] 5.4.2.1 Call Statement (note: parens are not allowed)
+call_statement = callee call_args?
 callee = name (identifier_op name)*
-call_spec
-    = LEFT_PAREN call_args RIGHT_PAREN
-    / call_args
-call_args = (expression (comma expression)* )?
+call_args = expression (comma expression)*
 
 expression = or_expr
 or_expr = not_expr (OR not_expr)*

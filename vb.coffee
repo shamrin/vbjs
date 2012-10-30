@@ -45,6 +45,8 @@ common_node_value = (n) ->
     when 'plain_call_expr'
       [{value: fn}, l, params..., r] = n.children
       call(fn, for {value} in params by 2 then value)
+    when 'braced_expression'
+      n.children[1].value
 
 vb_node_value = (n) ->
   switch n.name
@@ -104,8 +106,6 @@ vb_node_value = (n) ->
             property: identifier member n.children[i-1].value
           arguments: [ literal arg ]
       expression
-    when 'call_spec'
-      n.children[1]?.value ? n.children[0].value
     when 'call_args'
       for {value} in n.children by 2 then value
     when 'identifier_expr_itself'

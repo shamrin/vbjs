@@ -84,11 +84,11 @@ suite 'Modules -', ->
                   Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
-        run 'DoCmd.OpenForm ("Main Switchboard")',
-            'OpenForm("Main Switchboard")\n'
+        run 'DoCmd.OpenForm "Main Switchboard", 123',
+            'OpenForm("Main Switchboard",123)\n'
 
-    test 'arguments without braces', ->
-        run 'DoCmd.OpenForm "Main Switchboard"',
+    test 'one braced argument', ->
+        run 'DoCmd.OpenForm ("Main Switchboard")',
             'OpenForm("Main Switchboard")\n'
 
     test 'dotted argument', ->
@@ -96,7 +96,7 @@ suite 'Modules -', ->
                   Foo: "ns('MsgBox')(ns('A').dot('B'));\n"
 
     test 'numbers', ->
-        run 'DoCmd.Foo (1, 23, 456)',
+        run 'DoCmd.Foo 1, 23, 456',
             'Foo(1,23,456)\n'
 
     test 'comment', ->
