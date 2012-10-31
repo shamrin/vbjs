@@ -28,7 +28,9 @@ common_node_value = (n) ->
       literal n.children[0].value
     when 'bracketed_identifier'
       n.children[1].value
-    when 'name_itself', 'name_in_brackets', 'lazy_name'
+    when 'name_itself'
+      n.innerText().replace /\s+$/, ''
+    when 'name_in_brackets', 'lazy_name'
       n.innerText()
     when 'literal'
       literal n.children[1].value
@@ -116,7 +118,7 @@ vb_node_value = (n) ->
     when 'not_expr'
       n.children[1]?.value ? n.children[0].value  # FIXME it's just a stub now
     when 'unrestricted_name'
-      n.innerText().replace /\s+$/, ''
+      n.children[0].value
     when 'name_expression'
       result =
         type: 'CallExpression'

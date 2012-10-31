@@ -16,7 +16,7 @@ lazy_value
 lazy_name = 'Sum' _
 
 identifier_expr = identifier_expr_itself
-name = name_itself _
+name = name_itself
 
 // optional whitespace
 _ = [ \t]*

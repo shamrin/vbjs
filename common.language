@@ -38,4 +38,4 @@ RIGHT_PAREN = ')' _
 
 EOF = !.
 
-name_itself = [A-Za-z_][A-Za-z0-9_]*
+name_itself = [A-Za-z_][A-Za-z0-9_]* _

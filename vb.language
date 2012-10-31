@@ -51,9 +51,9 @@ call_args = (expression (comma expression)*)?
 
 with_expression = identifier_op name_expression
 name_expression = name (index !(call_args EOS) / member)*
-member = identifier_op (unrestricted_name / name)
+member = identifier_op unrestricted_name
 index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
-unrestricted_name = [A-Za-z_][A-Za-z_0-9]* _
+unrestricted_name = bracketed_identifier / name_itself
 
 expression = or_expr
 or_expr = not_expr (OR not_expr)*
@@ -73,7 +73,7 @@ identifier_expr
 with_identifier_expr = identifier_op identifier_expr_itself
 
 name
-    = !(keyword ![A-Za-z0-9_]) name_itself _
+    = !(keyword ![A-Za-z0-9_]) name_itself
     / bracketed_identifier
 
 // optional whitespace
