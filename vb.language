@@ -115,7 +115,10 @@ THEN = 'Then' _
 ELSE = 'Else' _
 ENDIF = END IF _
 EQUAL = '=' _
-CMP_OP = ('=' / '<>' / '<=' / '<' / '>=' / '>' ) _
+
+// [MS-VBAL] 5.6.9.5 Relational Operators
+CMP_OP = ('=' / '<>' / '><' / '<=' / '<' / '>=' / '>' ) _
+
 NOT = 'Not' _
 COLON = ':' _
 OR = 'Or' _
