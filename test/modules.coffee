@@ -99,6 +99,9 @@ suite 'Modules -', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
             'OpenForm("Main Switchboard")\n'
 
+    test 'two braced arguments', ->
+        run 'DoCmd.MoveSize (1), (2)', 'MoveSize(1,2)\n'
+
     test 'dotted argument', ->
         assert_js run('MsgBox A.B'),
                   Foo: "ns('MsgBox')(ns('A').dot('B'));\n"

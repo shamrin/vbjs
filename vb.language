@@ -63,7 +63,7 @@ range_clause
 call_statement = callee argument_list
 callee = with_expression / name_expression
 with_expression = identifier_op name_expression
-name_expression = name (index !(argument_list EOS) / member)*
+name_expression = name (!(argument_list EOS) index / member)*
 member = identifier_op unrestricted_name
 index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
