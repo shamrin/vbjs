@@ -186,7 +186,9 @@ suite 'Modules -', ->
 
     test 'Dim stub', ->
         test_foo_close before: """Dim returnValue As Boolean
-                                  Static db As DAO.Database"""
+                                  Static db As DAO.Database
+                                  Dim Num
+                                  """
 
     test 'assign stub', ->
         test_foo_close before: """foo = "Foo"

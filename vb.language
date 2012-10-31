@@ -36,7 +36,7 @@ statement
 resume_statement = RESUME name
 exit_statement = EXIT (FUNCTION / SUB)
 goto_statement = GOTO name
-dim_statement = (DIM / STATIC) name AS identifier_expr
+dim_statement = (DIM / STATIC) name (AS identifier_expr)?
 set_statement = (CONST / SET) name EQUAL expression
 with_statement = WITH expression EOS statements END WITH
 if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF
