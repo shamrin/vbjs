@@ -140,7 +140,7 @@ suite 'Modules -', ->
                                        ' Decrarations end here"""
 
     test 'funcdef arguments stub', ->
-        m = runmod "Sub Foo(N As Integer)\nDoCmd.Close\nEnd Sub"
+        m = runmod "Sub Foo(M, N As Integer)\nDoCmd.Close\nEnd Sub"
         assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'function As stub', ->
