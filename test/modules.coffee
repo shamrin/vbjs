@@ -230,10 +230,10 @@ suite 'Modules -', ->
                 Forms!Startup!HideStartupForm = False
             End If"""
 
-    test 'If Or _ stub 2', ->
+    test 'If Or And stub', ->
         test_foo_close before: """
             If (Aa = "") Or (Ba < 1) _
-               Or (C <> D) Or (D >= 5) Then
+               Or (C <> D) And (D >= 5) Then
                 E = 0
             End If"""
 

@@ -55,7 +55,7 @@ common_node_value = (n) ->
 
 vb_node_value = (n) ->
   switch n.name
-    when 'or_expr', 'cmp_expr'
+    when 'or_expr', 'and_expr', 'cmp_expr'
       n.children[0].value # FIXME it's just a stub now
     when 'module'
       n.children[2].value

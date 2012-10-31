@@ -55,8 +55,10 @@ member = identifier_op unrestricted_name
 index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
 
+// [MS-VBAL] 5.6.9.1 Operator Precedence and Associativity
 expression = or_expr
-or_expr = not_expr (OR not_expr)*
+or_expr = and_expr (OR and_expr)*
+and_expr = not_expr (AND not_expr)*
 not_expr = NOT? cmp_expr
 cmp_expr = concat_expr (CMP_OP concat_expr)?
 
@@ -117,6 +119,7 @@ CMP_OP = ('=' / '<>' / '<=' / '<' / '>=' / '>' ) _
 NOT = 'Not' _
 COLON = ':' _
 OR = 'Or' _
+AND = 'And' _
 WITH = 'With' _
 keyword
     = 'End'
@@ -129,6 +132,7 @@ keyword
     / 'Set'
     / 'Const'
     / 'Or'
+    / 'And'
     / 'Dim'
     / 'Static'
     / 'GoTo'
