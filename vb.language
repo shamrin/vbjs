@@ -44,10 +44,16 @@ single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = name COLON
 
-// [MS-VBAL] 5.4.2.1 Call Statement (note: parens are not allowed)
-call_statement = callee call_args?
-callee = name (identifier_op name)*
-call_args = expression (comma expression)*
+// [MS-VBAL] 5.4.2.1 Call Statement
+call_statement = callee call_args
+callee = with_expression / name_expression
+call_args = (expression (comma expression)*)?
+
+with_expression = identifier_op name_expression
+name_expression = name (index !(call_args EOS) / member)*
+member = identifier_op (unrestricted_name / name)
+index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
+unrestricted_name = [A-Za-z_][A-Za-z_0-9]* _
 
 expression = or_expr
 or_expr = not_expr (OR not_expr)*

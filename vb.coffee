@@ -92,20 +92,7 @@ vb_node_value = (n) ->
         callee: n.children[0].value
         arguments: n.children[1]?.value ? []
     when 'callee'
-      expression =
-        type: 'CallExpression'
-        callee: identifier 'ns'
-        arguments: [ literal n.children[0].value ]
-      for {value: arg}, i in n.children by 2 when i > 0
-        expression =
-          type: 'CallExpression'
-          callee:
-            type: 'MemberExpression'
-            computed: no
-            object: expression
-            property: identifier member n.children[i-1].value
-          arguments: [ literal arg ]
-      expression
+      n.children[0].value
     when 'call_args'
       for {value} in n.children by 2 then value
     when 'identifier_expr_itself'
@@ -128,6 +115,31 @@ vb_node_value = (n) ->
       result
     when 'not_expr'
       n.children[1]?.value ? n.children[0].value  # FIXME it's just a stub now
+    when 'unrestricted_name'
+      n.innerText().replace /\s+$/, ''
+    when 'name_expression'
+      result =
+        type: 'CallExpression'
+        callee: identifier 'ns'
+        arguments: [ literal n.children[0].value ]
+      for {value: operation} in n.children[1..]
+        result = operation result
+      result
+    when 'member'
+      (object) ->
+        type: 'CallExpression'
+        callee:
+          type: 'MemberExpression'
+          computed: no
+          object: object
+          property: identifier member n.children[0].value
+        arguments: [ literal n.children[1].value ]
+    when 'index'
+      [l, params..., r] = n.children
+      (callee) ->
+        type: 'CallExpression'
+        callee: callee
+        arguments: for {value} in params by 2 then literal value
 
 expr_node_value = (n) ->
   switch n.name

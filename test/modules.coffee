@@ -87,6 +87,10 @@ suite 'Modules -', ->
         run 'DoCmd.OpenForm "Main Switchboard", 123',
             'OpenForm("Main Switchboard",123)\n'
 
+    test 'one argument', ->
+        run 'DoCmd.OpenForm "Main Switchboard"',
+            'OpenForm("Main Switchboard")\n'
+
     test 'one braced argument', ->
         run 'DoCmd.OpenForm ("Main Switchboard")',
             'OpenForm("Main Switchboard")\n'
@@ -170,6 +174,7 @@ suite 'Modules -', ->
     test 'With stub', ->
       test_foo_close after: """With Application.FileDialog(msoFileDialogFilePicker)
                                  .Title = "Name"
+                                 .Filters.Add "All Files", "*.*"
                                End With"""
 
     test 'plain GoTo stub', ->
@@ -244,4 +249,3 @@ suite 'Modules -', ->
         assert_js m,
             Foo: "ns('DoCmd').dot('Open')();\n"
             Bar: "ns('DoCmd').dot('Close')();\n"
-
