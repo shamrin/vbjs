@@ -232,8 +232,8 @@ suite 'Modules -', ->
 
     test 'If Or _ stub 2', ->
         test_foo_close before: """
-            If (Aa = "") Or (Ba = "") _
-               Or (C <> D) Then
+            If (Aa = "") Or (Ba < 1) _
+               Or (C <> D) Or (D >= 5) Then
                 E = 0
             End If"""
 

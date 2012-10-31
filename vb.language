@@ -58,7 +58,7 @@ unrestricted_name = bracketed_identifier / name_itself
 expression = or_expr
 or_expr = not_expr (OR not_expr)*
 not_expr = NOT? cmp_expr
-cmp_expr = concat_expr ((EQUAL / NOT_EQUAL) concat_expr)?
+cmp_expr = concat_expr (CMP_OP concat_expr)?
 
 call_expr
     = braced_expression
@@ -113,7 +113,7 @@ THEN = 'Then' _
 ELSE = 'Else' _
 ENDIF = END IF _
 EQUAL = '=' _
-NOT_EQUAL = '<>' _
+CMP_OP = ('=' / '<>' / '<=' / '<' / '>=' / '>' ) _
 NOT = 'Not' _
 COLON = ':' _
 OR = 'Or' _
