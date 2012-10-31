@@ -43,6 +43,8 @@ common_node_value = (n) ->
       n.innerText()
     when 'number'
       literal parseInt(n.innerText(), 10)
+    when 'like_expr'
+      n.children[0].value # FIXME it's just a stub now
     when 'call_expr'
       n.children[0].value
     when 'name'

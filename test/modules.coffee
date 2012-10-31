@@ -205,6 +205,11 @@ suite 'Modules -', ->
                                      Resume FooExit
                                  End If"""
 
+    test 'Like stub', -> # TODO move to test/expressions.coffee
+        test_foo_close before: """If Not Foo Like "[A-Z]" Then
+                                     DoCmd.Bla
+                                  End If"""
+
     test 'If Not stub', ->
         test_foo_close before: """If Not IsNull(Me!Photo) Then
                                   hideImageFrame
