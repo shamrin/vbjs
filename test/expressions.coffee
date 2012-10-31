@@ -47,8 +47,8 @@ suite 'Expressions -', ->
         eq 30, run 'Abs([Field])', {Field: -30}, {}, fns
     test 'lazy functions', ->
         eq 40, run 'Sum([Field])', {}, {Field: [10, 10, 20]}, fns
-    test 'long addition', ->
-        eq 50, run '[X] + [Y] + [Z]', X: 10, Y: 20, Z: 20
+    test 'arithmetic', ->
+        eq 5, run '[A] / [B] + [C] * [D] - [E]', A: 9, B: 3, C: 2, D: 3, E: 4
     test 'nested calls', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
     test 'unknown function error' , ->

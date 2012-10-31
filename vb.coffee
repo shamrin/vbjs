@@ -16,12 +16,15 @@ common_node_value = (n) ->
     when 'concat_expr'
       result = if n.children[1]? then literal '' # force string
       for {value}, i in n.children by 2
-          result = if result? then plus result, value else value
+          result = if result? then operate '+', result, value else value
       result
-    when 'add_expr'
+    when 'add_expr', 'mul_expr'
       for {value}, i in n.children by 2
-          result = if result? then plus result, value else value
+        op = n.children[i-1]?.value
+        result = if result? then operate op, result, value else value
       result
+    when 'mul_op', 'add_op'
+      n.innerText().replace /\s+$/, ''
     when 'start', 'value', 'identifier_expr', 'identifier_expr_part'
       n.children[0].value
     when 'identifier'
@@ -213,10 +216,10 @@ parse = (source_type, expr) ->
     #pprint tree
     tree.value
 
-# `left` + `right`
-plus = (left, right) ->
+# `left` `op` `right`
+operate = (op, left, right) ->
     type: 'BinaryExpression'
-    operator: '+'
+    operator: op
     left: left
     right: right
 
