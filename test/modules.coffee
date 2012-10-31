@@ -185,7 +185,7 @@ suite 'Modules -', ->
                                   Set someVal = 43"""
 
     test 'Dim stub', ->
-        test_foo_close before: """Dim returnValue As Boolean
+        test_foo_close before: """Dim returnValue As Boolean, path As String
                                   Static db As DAO.Database
                                   Dim Num
                                   """
