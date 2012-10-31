@@ -98,8 +98,10 @@ vb_node_value = (n) ->
         arguments: n.children[1]?.value ? []
     when 'callee'
       n.children[0].value
-    when 'call_args'
+    when 'argument_list'
       for {value} in n.children by 2 then value
+    when 'positional_argument'
+      n.children[0]?.value ? {type: 'Identifier', name: 'undefined'}
     when 'identifier_expr_itself'
       # [A].[B]![C] => ns('A').dot('B').bang('C')
       result = n.children[0].value

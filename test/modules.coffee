@@ -87,6 +87,10 @@ suite 'Modules -', ->
         run 'DoCmd.OpenForm "Main Switchboard", 123',
             'OpenForm("Main Switchboard",123)\n'
 
+    test 'arguments missing', ->
+        run 'DoCmd.OpenReport "Sales by Category", 1, , 3',
+            'OpenReport("Sales by Category",1,undefined,3)\n'
+
     test 'one argument', ->
         run 'DoCmd.OpenForm "Main Switchboard"',
             'OpenForm("Main Switchboard")\n'

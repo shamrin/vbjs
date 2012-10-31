@@ -55,15 +55,17 @@ range_clause
     / expression
 
 // [MS-VBAL] 5.4.2.1 Call Statement
-call_statement = callee call_args
+call_statement = callee argument_list
 callee = with_expression / name_expression
-call_args = (expression (comma expression)*)?
-
 with_expression = identifier_op name_expression
-name_expression = name (index !(call_args EOS) / member)*
+name_expression = name (index !(argument_list EOS) / member)*
 member = identifier_op unrestricted_name
 index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
+
+// [MS-VBAL] 5.6.13.1 Argument Lists
+argument_list = (expression (comma positional_argument)*)?
+positional_argument = expression?
 
 // [MS-VBAL] 5.6.9.1 Operator Precedence and Associativity
 expression = or_expr
