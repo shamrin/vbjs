@@ -49,6 +49,8 @@ suite 'Expressions -', ->
         eq 40, run 'Sum([Field])', {}, {Field: [10, 10, 20]}, fns
     test 'arithmetic', ->
         eq 5, run '[A] / [B] + [C] * [D] - [E]', A: 9, B: 3, C: 2, D: 3, E: 4
+    test 'float', ->
+        eq 2.0, run '[A] + 0.5', A: 1.5
     test 'nested calls', ->
         eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
     test 'unknown function error' , ->
