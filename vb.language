@@ -38,11 +38,16 @@ exit_statement = EXIT (FUNCTION / SUB)
 goto_statement = GOTO name
 dim_statement = (DIM / STATIC) name type_spec? (comma name type_spec?)*
 set_statement = (CONST / SET) name EQUAL expression
-with_statement = WITH expression EOS statements END WITH
-if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF
 single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = name COLON
+
+with_statement = WITH expression EOS statements END WITH
+
+// [MS-VBAL] 5.4.2.8 If Statement
+if_statement = IF expression THEN EOS statements else_if_block* else_block? ENDIF
+else_if_block = ELSEIF expression THEN EOS? statements
+else_block = ELSE EOS? statements
 
 // [MS-VBAL] 5.4.2.10 Select Case Statement
 select_statement
@@ -125,6 +130,7 @@ SET = 'Set' _
 IF = 'If' _
 THEN = 'Then' _
 ELSE = 'Else' _
+ELSEIF = 'ElseIf' _
 ENDIF = END IF _
 SELECT = 'Select' _
 CASE = 'Case' _
@@ -148,6 +154,7 @@ keyword
     / 'If'
     / 'Then'
     / 'Else'
+    / 'ElseIf'
     / 'Set'
     / 'Const'
     / 'Or'

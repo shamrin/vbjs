@@ -215,9 +215,11 @@ suite 'Modules -', ->
                                   hideImageFrame
                                  End If"""
 
-    test 'If Else stub', ->
+    test 'If ElseIf Else stub', ->
         test_foo_close before: """If IsItReplica() Then
                                       DoCmd.TellAboutIt
+                                  ElseIf IsLoaded("Product List") Then
+                                      DoCmd.OpenForm strDocName
                                   Else
                                       DoCmd.DoSomething
                                       DoCmd.DoSomethingElse
