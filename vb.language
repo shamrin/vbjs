@@ -15,7 +15,8 @@ func_end
     = END FUNCTION __
     / END SUB __
 args_spec = LEFT_PAREN (arg_spec (comma arg_spec)* )? RIGHT_PAREN type_spec? EOS
-arg_spec = name type_spec?
+arg_spec = mechanism? name type_spec?
+mechanism = BYVAL / BYREF
 statements = (single_line_statement / multiline_statement)*
 type_spec = AS identifier_expr
 on_error_statement = ONERROR (GOTO name / RESUME NEXT)
@@ -115,6 +116,9 @@ EOL = "\n" / "\r\n" / "\u2028" / "\u2029" / "\r" / EOF
 FUNCTION = 'Function' _
 SUB = 'Sub' _
 PRIVATE = 'Private' _
+AS = 'As' _
+BYVAL = 'ByVal' _
+BYREF = 'ByRef' _
 END = 'End' _
 OPTION = 'Option' _
 ATTRIBUTE = 'Attribute' _
@@ -171,4 +175,3 @@ keyword
     / 'Select'
     / 'To'
     / 'Is'
-AS = 'As' _

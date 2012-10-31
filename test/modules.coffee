@@ -146,8 +146,10 @@ suite 'Modules -', ->
                                        Dim path As String
                                        ' Decrarations end here"""
 
-    test 'funcdef arguments stub', ->
-        m = runmod "Sub Foo(M, N As Integer)\nDoCmd.Close\nEnd Sub"
+    test 'func_def arguments stub', ->
+        m = runmod """Sub Foo(A, B As Integer, ByVal C As Integer)
+                      DoCmd.Close
+                      End Sub"""
         assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'function As stub', ->
