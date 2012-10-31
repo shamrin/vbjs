@@ -240,6 +240,18 @@ suite 'Modules -', ->
     test 'If Or CrLf', ->
         test_foo_close before: 'If A _\r\nOr B Then\r\nC = 0\r\nEnd If'
 
+    test 'Select Case stub', ->
+        test_foo_close before: """
+          Select Case Me!ReportToPrint
+            Case 1, 3 To 5
+              DoCmd.OpenReport "Sales Totals by Amount", PrintMode
+              DoCmd.Quit
+            Case Is >< 10
+              DoCmd.Quit
+            Case Else
+              DoCmd.Quit
+          End Select"""
+
     test 'several functions', ->
         m = runmod """Function Foo()
                           DoCmd.Open

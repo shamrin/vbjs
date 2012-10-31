@@ -20,7 +20,7 @@ statements = (single_line_statement / multiline_statement)*
 type_spec = AS identifier_expr
 on_error_statement = ONERROR (GOTO name / RESUME NEXT)
 
-multiline_statement = (if_statement / with_statement) EOS
+multiline_statement = (if_statement / with_statement / select_statement) EOS
 single_line_statement = statement EOS
 statement
     = resume_statement
@@ -43,6 +43,16 @@ if_statement = IF expression THEN EOS statements (ELSE EOS? statements)? ENDIF
 single_line_if_statement = IF expression THEN statement
 assign_statement = identifier_expr EQUAL expression
 label_statement = name COLON
+
+// [MS-VBAL] 5.4.2.10 Select Case Statement
+select_statement
+    = SELECT CASE expression EOS (case_clause / case_else_clause)* END SELECT
+case_clause = CASE range_clause (comma range_clause)* EOS statements
+case_else_clause = CASE ELSE EOS statements
+range_clause
+    = IS CMP_OP expression
+    / expression TO expression
+    / expression
 
 // [MS-VBAL] 5.4.2.1 Call Statement
 call_statement = callee call_args
@@ -114,6 +124,10 @@ IF = 'If' _
 THEN = 'Then' _
 ELSE = 'Else' _
 ENDIF = END IF _
+SELECT = 'Select' _
+CASE = 'Case' _
+TO = 'To' _
+IS = 'Is' _
 EQUAL = '=' _
 
 // [MS-VBAL] 5.6.9.5 Relational Operators
@@ -143,4 +157,8 @@ keyword
     / 'Attribute'
     / 'Not'
     / 'With'
+    / 'Case'
+    / 'Select'
+    / 'To'
+    / 'Is'
 AS = 'As' _
