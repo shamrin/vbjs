@@ -210,10 +210,10 @@ suite 'Modules -', ->
                                      DoCmd.Bla
                                   End If"""
 
-    test 'If Not stub', ->
+    test 'If Not EndIf stub', ->
         test_foo_close before: """If Not IsNull(Me!Photo) Then
-                                  hideImageFrame
-                                 End If"""
+                                      hideImageFrame
+                                  EndIf"""
 
     test 'If ElseIf Else stub', ->
         test_foo_close before: """If IsItReplica() Then

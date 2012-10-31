@@ -131,7 +131,7 @@ IF = 'If' _
 THEN = 'Then' _
 ELSE = 'Else' _
 ELSEIF = 'ElseIf' _
-ENDIF = END IF _
+ENDIF = 'EndIf' _ / 'End If' _
 SELECT = 'Select' _
 CASE = 'Case' _
 TO = 'To' _
@@ -147,14 +147,15 @@ OR = 'Or' _
 AND = 'And' _
 WITH = 'With' _
 keyword
-    = 'End'
+    = 'EndIf' // must be before 'End', or 'EndIf' would be parsed as `name`
+    / 'End'
     / 'Function'
     / 'Sub'
     / 'Private'
     / 'If'
     / 'Then'
-    / 'Else'
     / 'ElseIf'
+    / 'Else'
     / 'Set'
     / 'Const'
     / 'Or'
