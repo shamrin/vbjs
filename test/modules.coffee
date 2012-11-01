@@ -219,19 +219,26 @@ suite 'Modules -', ->
                       ns('hideImageFrame')();
                       }\n"""
 
-  test 'If ElseIf Else stub', ->
-    test_foo_close before: """If IsItReplica() Then
-                                DoCmd.TellAboutIt
-                              ElseIf IsLoaded("Product List") Then
-                                DoCmd.OpenForm strDocName
-                              Else
-                                DoCmd.DoSomething
-                                DoCmd.DoSomethingElse
-                              End If"""
+  test 'If ElseIf Else', ->
+    assert_js foo("""If IsIt() Then
+                       DoCmd.DoA
+                     ElseIf IsLoaded("Product List") Then
+                       DoCmd.OpenForm strDocName
+                     Else
+                       DoCmd.DoA
+                       DoCmd.DoB
+                     End If"""),
+              Foo: """if (ns('IsIt')()) {
+                      ns('DoCmd').dot('DoA')();
+                      } else if (ns('IsLoaded')('Product List')) {
+                      ns('DoCmd').dot('OpenForm')(ns('strDocName'));
+                      } else {
+                      ns('DoCmd').dot('DoA')();
+                      ns('DoCmd').dot('DoB')();
+                      }\n"""
 
   test 'If single line stub', ->
     test_foo_close before: "If IsItReplica() Then DoCmd.TellAboutIt"
-
 
   test 'Condition in braces', ->
     assert_js foo("""If (IsItReplica()) Then

@@ -188,13 +188,27 @@ vb_node_value = (n) ->
     when 'test_block'
       n.children[0].value
     when 'if_statement'
-      [_, test_block, then_block] = n.children
+      [_1, test_block, then_block, else_blocks..., _2] = n.children
+      for {value: expression} in else_blocks[..].reverse()
+        result = expression result
       type: 'IfStatement'
       test: test_block.value
       consequent:
         type: 'BlockStatement'
         body: then_block.value
-      alternate: null
+      alternate: result ? null
+    when 'else_if_block'
+      (alternate = null) ->
+        type: 'IfStatement'
+        test: n.children[1].value
+        consequent:
+          type: 'BlockStatement'
+          body: n.children[n.children.length-1].value
+        alternate: alternate
+    when 'else_block'
+      ->
+        type: 'BlockStatement'
+        body: n.children[n.children.length-1].value
     when 'assign_statement'
       type: 'ExpressionStatement'
       expression:
