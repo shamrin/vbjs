@@ -240,12 +240,14 @@ suite 'Modules -', ->
         Forms!Startup!HideStartupForm = False
       End If"""
 
-  test 'If Or And stub', ->
-    test_foo_close before: """
-      If (Aa = "") Or (Ba < 1) _
-             Or (C <> D) And (D >= 5) Then
-        E = 0
-      End If"""
+  test 'If Or And', ->
+    assert_js foo("""If (Aa = "") Or (0 < 1) _
+                         Or (1 <> 2) And (D >= 5) Then
+                       Bar
+                     End If"""),
+              Foo: """if (ns('Aa') === '' || 0 < 1 || 1 !== 2 && ns('D') >= 5) {
+                      ns('Bar')();
+                      }\n"""
 
   test 'If Or CrLf', ->
     test_foo_close before: 'If A _\r\nOr B Then\r\nC = 0\r\nEnd If'

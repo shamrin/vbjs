@@ -6,6 +6,8 @@ repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
 
 member = (op) -> {'.': 'dot', '!': 'bang'}[op]
+operator = (op) ->
+  {'=': '===', '<>': '!==', '><': '!==', 'Or': '||', 'And': '&&'}[op] ? op
 
 common_node_value = (n) ->
   switch n.name
@@ -23,7 +25,7 @@ common_node_value = (n) ->
         op = n.children[i-1]?.value
         result = if result? then operate op, result, value else value
       result
-    when 'mul_op', 'add_op'
+    when 'mul_op', 'add_op', 'CMP_OP', 'AND', 'OR'
       n.innerText().replace /\s+$/, ''
     when 'start', 'value', 'identifier_expr', 'identifier_expr_part'
       n.children[0].value
@@ -59,8 +61,22 @@ common_node_value = (n) ->
 
 vb_node_value = (n) ->
   switch n.name
-    when 'or_expr', 'and_expr', 'cmp_expr'
-      n.children[0].value # FIXME it's just a stub now
+    when 'or_expr', 'and_expr'
+      for {value}, i in n.children by 2
+        result =
+          if result?
+            type: 'LogicalExpression'
+            operator: operator n.children[i-1].value
+            left: result
+            right: value
+          else
+            value
+      result
+    when 'cmp_expr'
+      result = n.children[0].value
+      if (right = n.children[2]?.value)?
+        result = operate operator(n.children[1].value), result, right
+      result
     when 'module'
       n.children[2].value
     when 'func_defs'
