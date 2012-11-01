@@ -288,3 +288,15 @@ class VBRuntimeError extends Error
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
                   VBRuntimeError}
+
+# Usage: cat VBA_module | coffee vb.coffee
+#        echo -n "[foo]&[bar]" | coffee vb.coffee -e
+if require.main == module
+  process.stdin.resume()
+  process.stdin.setEncoding 'utf8'
+
+  data = ''
+  process.stdin.on 'data', (chunk) -> data += chunk
+  process.stdin.on 'end', ->
+    c = if process.argv[2] is '-e' then compileExpression else compileModule
+    process.stdout.write c(data) + '\n'
