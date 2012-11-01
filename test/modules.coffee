@@ -19,20 +19,19 @@ repr = (o, depth=0, max=2) ->
       else o
 
 run = (code, expected) ->
-    log = []
-    code = """Function Foo()
-              #{code}
-              End Function"""
-    #console.log "code: `#{code}`"
-    module = runModule code, DoCmd:
-                            dot: (name) ->
-                                (args...) ->
-                                    spec = (repr a for a in args).join ','
-                                    log.push "#{name}(#{spec})"
-    if expected?
-        module.Foo()
-        assert.strictEqual log.join('\n'), expected
-    module
+  log = []
+  code = """Function Foo()
+            #{code}
+            End Function"""
+  #console.log "code: `#{code}`"
+  module = runModule code,
+                     DoCmd: dot: (name) ->
+                                   (args...) ->
+                                     spec = (repr a for a in args).join ','
+                                     log.push "#{name}(#{spec})"
+  module.Foo()
+  assert.strictEqual log.join('\n'), expected
+  module
 
 assert_js = (vba, expected_obj) ->
   actual = evaluate compileModule vba
