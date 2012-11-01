@@ -67,6 +67,10 @@ common_node_value = (n) ->
       call(fn, for {value} in params by 2 then value)
     when 'braced_expression'
       n.children[1].value
+    when 'TRUE'
+      literal true
+    when 'FALSE'
+      literal false
 
 vb_node_value = (n) ->
   switch n.name
@@ -186,6 +190,16 @@ vb_node_value = (n) ->
         type: 'BlockStatement'
         body: then_block.value
       alternate: null
+    when 'assign_statement'
+      type: 'ExpressionStatement'
+      expression:
+        type: 'CallExpression' # FIXME use AssignmentExpression?
+        callee:
+          type: 'MemberExpression'
+          computed: no
+          object: n.children[0].value
+          property: identifier 'let'
+        arguments: [ n.children[2].value ]
 
 expr_node_value = (n) ->
   switch n.name

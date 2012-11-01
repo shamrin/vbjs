@@ -189,9 +189,11 @@ suite 'Modules -', ->
                               Static db As DAO.Database
                               Dim Num"""
 
-  test 'assign stub', ->
-    test_foo_close before: """foo = "Foo"
-                              bar = False"""
+  test 'assign', ->
+    assert_js foo("""foo = "Foo"
+                     bar = False"""),
+              Foo: """ns('foo').let('Foo');
+                      ns('bar').let(false);\n"""
 
   test 'simple If', ->
     assert_js foo("""If Bar Then

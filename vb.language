@@ -90,7 +90,7 @@ primary_expr
     / with_expression
     / name_expression
 
-identifier_expr
+identifier_expr // TODO get rid of it, use with_expression and name_expression
     = with_identifier_expr
     / identifier_expr_itself
 
