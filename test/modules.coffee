@@ -237,8 +237,10 @@ suite 'Modules -', ->
                       ns('DoCmd').dot('DoB')();
                       }\n"""
 
-  test 'If single line stub', ->
-    test_foo_close before: "If IsItReplica() Then DoCmd.TellAboutIt"
+  test 'If single line', ->
+    assert_js foo("If IsItReplica() Then DoCmd.TellAboutIt"),
+              Foo: """if (ns('IsItReplica')())
+                      ns('DoCmd').dot('TellAboutIt')();\n"""
 
   test 'Condition in braces', ->
     assert_js foo("""If (IsItReplica()) Then

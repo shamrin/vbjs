@@ -186,6 +186,12 @@ vb_node_value = (n) ->
         arguments: for {value} in params by 2 then value
     when 'test_block'
       n.children[0].value
+    when 'single_line_if_statement'
+      [_1, test_block, _2, then_block] = n.children
+      type: 'IfStatement'
+      test: test_block.value
+      consequent: then_block.value
+      alternate: null
     when 'if_statement'
       [_1, test_block, then_block, else_blocks..., _2] = n.children
       for {value: expression} in else_blocks[..].reverse()
