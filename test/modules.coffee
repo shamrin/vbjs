@@ -211,10 +211,13 @@ suite 'Modules -', ->
                       ns('DoCmd').dot('Bla')();
                       }\n"""
 
-  test 'If Not EndIf stub', ->
-    test_foo_close before: """If Not IsNull(Me!Photo) Then
-                                hideImageFrame
-                              EndIf"""
+  test 'If Not EndIf', ->
+    assert_js foo("""If Not IsNull(Me!Photo) Then
+                       hideImageFrame
+                     EndIf"""),
+              Foo: """if (!ns('IsNull')(ns('Me').bang('Photo'))) {
+                      ns('hideImageFrame')();
+                      }\n"""
 
   test 'If ElseIf Else stub', ->
     test_foo_close before: """If IsItReplica() Then

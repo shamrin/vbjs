@@ -154,7 +154,12 @@ vb_node_value = (n) ->
           arguments: [ arg ]
       result
     when 'not_expr'
-      n.children[1]?.value ? n.children[0].value  # FIXME it's just a stub now
+      if n.children[1]?
+        type: 'UnaryExpression'
+        operator: '!'
+        argument: n.children[1].value
+      else
+        n.children[0].value
     when 'unrestricted_name'
       n.children[0].value
     when 'name_expression', 'callee_name_expression'
