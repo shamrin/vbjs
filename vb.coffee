@@ -16,7 +16,7 @@ common_node_value = (n) ->
     when 'concat_expr'
       result = if n.children[1]? then literal '' # force string
       for {value}, i in n.children by 2
-          result = if result? then operate '+', result, value else value
+        result = if result? then operate '+', result, value else value
       result
     when 'add_expr', 'mul_expr'
       for {value}, i in n.children by 2
@@ -193,50 +193,50 @@ expr_node_value = (n) ->
 # [2]: https://github.com/Constellation/escodegen
 # [3]: http://esprima.org/demo/parse.html
 parse = (source_type, expr) ->
-    parser = {'vb': vb_parser, 'expr': expr_parser}[source_type]
-    tree = parser.parse expr
+  parser = {'vb': vb_parser, 'expr': expr_parser}[source_type]
+  tree = parser.parse expr
 
-    # first copy-pasted from sqld3/parse_sql.coffee
-    Object.getPrototypeOf(tree).toString = (spaces = '') ->
-        result = try
-                     "=> #{escodegen.generate @value}"
-                 catch error
-                     if @value? then "=> AST: #{repr @value}" else ''
+  # first copy-pasted from sqld3/parse_sql.coffee
+  Object.getPrototypeOf(tree).toString = (spaces = '') ->
+    result = try
+               "=> #{escodegen.generate @value}"
+             catch error
+               if @value? then "=> AST: #{repr @value}" else ''
 
-        string = spaces + "#{@name} <#{repr @innerText()}> " + result
-        for child in @children when typeof child isnt 'string'
-            string += "\n" + child.toString(spaces + ' ')
+    string = spaces + "#{@name} <#{repr @innerText()}> " + result
+    for child in @children when typeof child isnt 'string'
+      string += "\n" + child.toString(spaces + ' ')
 
-        return string
+    return string
 
-    node_value = {'vb': vb_node_value, 'expr': expr_node_value}[source_type]
-    tree.traverse
-        traversesTextNodes: false
-        exitedNode: (n) ->
-            n.value = node_value(n) ? common_node_value(n)
-            #if n.name is 'start' then console.log n.toString()
+  node_value = {'vb': vb_node_value, 'expr': expr_node_value}[source_type]
+  tree.traverse
+    traversesTextNodes: false
+    exitedNode: (n) ->
+      n.value = node_value(n) ? common_node_value(n)
+      #if n.name is 'start' then console.log n.toString()
 
-    if not tree.value? and process?.env?.TESTING?
-        require("./test/#{source_type}.peg.js").check '<string>', expr
+  if not tree.value? and process?.env?.TESTING?
+    require("./test/#{source_type}.peg.js").check '<string>', expr
 
-    #pprint tree
-    tree.value
+  #pprint tree
+  tree.value
 
 # `left` `op` `right`
 operate = (op, left, right) ->
-    type: 'BinaryExpression'
-    operator: op
-    left: left
-    right: right
+  type: 'BinaryExpression'
+  operator: op
+  left: left
+  right: right
 
 # ns("`func_name`")(ns, `args`...)
 call = (func_name, args) ->
+  type: 'CallExpression'
+  callee:
     type: 'CallExpression'
-    callee:
-        type: 'CallExpression'
-        callee: identifier 'ns'
-        arguments: [literal func_name]
-    arguments: [identifier('ns')].concat args
+    callee: identifier 'ns'
+    arguments: [literal func_name]
+  arguments: [identifier('ns')].concat args
 
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
@@ -282,9 +282,9 @@ evaluate = (js, context) ->
   f vals...
 
 class VBRuntimeError extends Error
-    constructor: (msg) ->
-        @name = 'VBRuntimeError'
-        @message = msg or @name
+  constructor: (msg) ->
+    @name = 'VBRuntimeError'
+    @message = msg or @name
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
                   VBRuntimeError}
