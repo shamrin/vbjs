@@ -107,15 +107,14 @@ vb_node_value = (n) ->
         id: null
         params: []
         defaults: []
-        body:
-          type: 'BlockStatement'
-          body: body
+        body: body
         rest: null
         generator: false
         expression: false
       kind: 'init'
     when 'statements'
-      for {value} in n.children when value? then value
+      type: 'BlockStatement'
+      body: for {value} in n.children when value? then value
     when 'single_line_statement', 'multiline_statement'
       n.children[0].value
     when 'statement'
@@ -193,22 +192,16 @@ vb_node_value = (n) ->
         result = expression result
       type: 'IfStatement'
       test: test_block.value
-      consequent:
-        type: 'BlockStatement'
-        body: then_block.value
+      consequent: then_block.value
       alternate: result ? null
     when 'else_if_block'
       (alternate = null) ->
         type: 'IfStatement'
         test: n.children[1].value
-        consequent:
-          type: 'BlockStatement'
-          body: n.children[n.children.length-1].value
+        consequent: n.children[n.children.length-1].value
         alternate: alternate
     when 'else_block'
-      ->
-        type: 'BlockStatement'
-        body: n.children[n.children.length-1].value
+      -> n.children[n.children.length-1].value
     when 'assign_statement'
       type: 'ExpressionStatement'
       expression:
