@@ -46,7 +46,8 @@ label_statement = name COLON
 with_statement = WITH expression EOS statements END WITH
 
 // [MS-VBAL] 5.4.2.8 If Statement
-if_statement = IF expression THEN EOS statements else_if_block* else_block? ENDIF
+if_statement = IF test_block statements else_if_block* else_block? ENDIF
+test_block = expression THEN EOS
 else_if_block = ELSEIF expression THEN EOS? statements
 else_block = ELSE EOS? statements
 
@@ -62,12 +63,15 @@ range_clause
 
 // [MS-VBAL] 5.4.2.1 Call Statement
 call_statement = callee argument_list
-callee = with_expression / name_expression
-with_expression = identifier_op name_expression
-name_expression = name (!(argument_list EOS) index / member)*
+callee = callee_with_expression / callee_name_expression
+callee_with_expression = identifier_op callee_name_expression
+callee_name_expression = name (!(argument_list EOS) index / member)*
 member = identifier_op unrestricted_name
 index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
+
+with_expression = identifier_op name_expression
+name_expression = name (index / member)*
 
 // [MS-VBAL] 5.6.13.1 Argument Lists
 argument_list = (expression (comma positional_argument)*)?
@@ -80,10 +84,11 @@ and_expr = not_expr (AND not_expr)*
 not_expr = NOT? cmp_expr
 cmp_expr = concat_expr (CMP_OP concat_expr)?
 
-call_expr
+primary_expr
     = braced_expression
     / value
-    / plain_call_expr
+    / with_expression
+    / name_expression
 
 identifier_expr
     = with_identifier_expr

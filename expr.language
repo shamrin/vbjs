@@ -3,9 +3,10 @@ expression = concat_expr
 
 {{include common}}
 
-call_expr
+primary_expr
     = lazy_call_expr
     / braced_expression
+    / identifier_expr
     / value
     / plain_call_expr
 lazy_call_expr

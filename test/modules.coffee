@@ -193,11 +193,13 @@ suite 'Modules -', ->
     test_foo_close before: """foo = "Foo"
                               bar = False"""
 
-  test 'If stub', ->
-    test_foo_close after: """If Err = 3270 Then
-                               DoCmd.Bla
-                               Resume FooExit
-                             End If"""
+  test 'simple If', ->
+    assert_js foo("""If Bar Then
+                       DoCmd.Bla
+                     End If"""),
+              Foo: """if (ns('Bar')) {
+                      ns('DoCmd').dot('Bla')();
+                      }\n"""
 
   test 'Like stub', -> # TODO move to test/expressions.coffee
     test_foo_close before: """If Not Foo Like "[A-Z]" Then
@@ -223,10 +225,13 @@ suite 'Modules -', ->
     test_foo_close before: "If IsItReplica() Then DoCmd.TellAboutIt"
 
 
-  test 'Condition in braces stub', ->
-    test_foo_close before: """If (IsItReplica()) Then
-                                DoCmd.TellAboutIt
-                              End If"""
+  test 'Condition in braces', ->
+    assert_js foo("""If (IsItReplica()) Then
+                       DoCmd.TellAboutIt
+                     End If"""),
+              Foo: """if (ns('IsItReplica')()) {
+                      ns('DoCmd').dot('TellAboutIt')();
+                      }\n"""
 
   test 'If Or _ stub', ->
     test_foo_close before: """

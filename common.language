@@ -3,7 +3,7 @@ add_expr = mul_expr (add_op mul_expr)*
 mul_expr = like_expr (mul_op like_expr)*
 
 // [MS-VBAL] 5.6.9.6 Like Operator
-like_expr = call_expr (LIKE expression)?
+like_expr = primary_expr (LIKE expression)?
 
 braced_expression = LEFT_PAREN expression RIGHT_PAREN
 
@@ -11,8 +11,7 @@ plain_call_expr
     = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
 
 value
-    = identifier_expr
-    / literal
+    = literal
     / TRUE
     / FALSE
     / float

@@ -47,7 +47,7 @@ common_node_value = (n) ->
       literal parseFloat(n.innerText())
     when 'like_expr'
       n.children[0].value # FIXME it's just a stub now
-    when 'call_expr'
+    when 'primary_expr'
       n.children[0].value
     when 'name'
       n.children[0].value
@@ -87,7 +87,7 @@ vb_node_value = (n) ->
       kind: 'init'
     when 'statements'
       for {value} in n.children when value? then value
-    when 'single_line_statement'
+    when 'single_line_statement', 'multiline_statement'
       n.children[0].value
     when 'statement'
       n.children[0].value
@@ -128,7 +128,7 @@ vb_node_value = (n) ->
       n.children[1]?.value ? n.children[0].value  # FIXME it's just a stub now
     when 'unrestricted_name'
       n.children[0].value
-    when 'name_expression'
+    when 'name_expression', 'callee_name_expression'
       result =
         type: 'CallExpression'
         callee: identifier 'ns'
@@ -151,6 +151,16 @@ vb_node_value = (n) ->
         type: 'CallExpression'
         callee: callee
         arguments: for {value} in params by 2 then literal value
+    when 'test_block'
+      n.children[0].value
+    when 'if_statement'
+      [_, test_block, then_block] = n.children
+      type: 'IfStatement'
+      test: test_block.value
+      consequent:
+        type: 'BlockStatement'
+        body: then_block.value
+      alternate: null
 
 expr_node_value = (n) ->
   switch n.name
