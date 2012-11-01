@@ -19,7 +19,7 @@ repr = (o, depth=0, max=2) ->
       else o
 
 run = (code, expected) ->
-    log = ''
+    log = []
     code = """Function Foo()
               #{code}
               End Function"""
@@ -28,10 +28,10 @@ run = (code, expected) ->
                             dot: (name) ->
                                 (args...) ->
                                     spec = (repr a for a in args).join ','
-                                    log += "#{name}(#{spec})\n"
+                                    log.push "#{name}(#{spec})"
     if expected?
         module.Foo()
-        assert.strictEqual log, expected
+        assert.strictEqual log.join('\n'), expected
     module
 
 assert_js = (vba, expected_obj) ->
@@ -63,7 +63,7 @@ suite 'Modules -', ->
         run '', ''
 
     test 'one line', ->
-        run 'DoCmd.Close', 'Close()\n'
+      run 'DoCmd.Close', 'Close()'
 
     test 'bracketed', ->
       assert_js foo("""Me![Customer Orders].Requery
@@ -81,30 +81,29 @@ suite 'Modules -', ->
                 Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
-        run 'DoCmd.OpenForm "Main Switchboard", 123',
-            'OpenForm("Main Switchboard",123)\n'
+      run 'DoCmd.OpenForm "Main Switchboard", 123',
+          'OpenForm("Main Switchboard",123)'
 
     test 'arguments missing', ->
-        run 'DoCmd.OpenReport "Sales by Category", 1, , 3',
-            'OpenReport("Sales by Category",1,undefined,3)\n'
+      run 'DoCmd.OpenReport "Sales by Category", 1, , 3',
+          'OpenReport("Sales by Category",1,undefined,3)'
 
     test 'one argument', ->
-        run 'DoCmd.OpenForm "Main Switchboard"',
-            'OpenForm("Main Switchboard")\n'
+      run 'DoCmd.OpenForm "Main Switchboard"',
+          'OpenForm("Main Switchboard")'
 
     test 'one braced argument', ->
-        run 'DoCmd.OpenForm ("Main Switchboard")',
-            'OpenForm("Main Switchboard")\n'
+      run 'DoCmd.OpenForm ("Main Switchboard")',
+          'OpenForm("Main Switchboard")'
 
     test 'two braced arguments', ->
-        run 'DoCmd.MoveSize (1), (2)', 'MoveSize(1,2)\n'
+      run 'DoCmd.MoveSize (1), (2)', 'MoveSize(1,2)'
 
     test 'dotted argument', ->
       assert_js foo('MsgBox A.B'), Foo: "ns('MsgBox')(ns('A').dot('B'));\n"
 
     test 'numbers', ->
-        run 'DoCmd.Foo 1, 23, 456',
-            'Foo(1,23,456)\n'
+      run 'DoCmd.Foo 1, 23, 456', 'Foo(1,23,456)'
 
     test 'comment', ->
         run "' hi there!", ''
@@ -116,17 +115,17 @@ suite 'Modules -', ->
         run "  ' hi there!\n  ' bye!", ''
 
     test 'end comment', ->
-        run "DoCmd.Close ' this is comment", 'Close()\n'
+      run "DoCmd.Close ' this is comment", 'Close()'
 
     test 'complex indented', ->
-        run "  ' Closes Startup form.\n" +
-            "  ' Used in OnClick property...\n" +
-            "   DoCmd.Close\n" +
-            "   DoCmd.OpenForm (\"Main Switchboard\")",
-            'Close()\nOpenForm("Main Switchboard")\n'
+      run "  ' Closes Startup form.\n" +
+          "  ' Used in OnClick property...\n" +
+          "   DoCmd.Close\n" +
+          "   DoCmd.OpenForm (\"Main Switchboard\")",
+          'Close()\nOpenForm("Main Switchboard")'
 
     test 'strange', ->
-        run 'DoCmd.EndFunction', 'EndFunction()\n'
+      run 'DoCmd.EndFunction', 'EndFunction()'
 
     test 'leading empty line', ->
       assert_js "\n#{foo 'DoCmd.Close'}", Foo: "ns('DoCmd').dot('Close')();\n"
@@ -161,18 +160,18 @@ suite 'Modules -', ->
             after: 'Resume LabelName'
 
     test 'Exit Function', ->
-        run """DoCmd.Close
-               Exit Function
-               DoCmd.WillNotRun""", 'Close()\n'
+      run """DoCmd.Close
+             Exit Function
+             DoCmd.WillNotRun""", 'Close()'
 
     test 'Label stub', ->
-        run """On Error GoTo FooError
-                   DoCmd.Close
-               FooExit:
-                   Exit Function
-               FooError:
-                   DoCmd.HandleError
-                   Resume FooExit""", 'Close()\n'
+      run """On Error GoTo FooError
+               DoCmd.Close
+             FooExit:
+               Exit Function
+             FooError:
+               DoCmd.HandleError
+               Resume FooExit""", 'Close()'
 
     test 'With stub', ->
       test_foo_close after: """With Application.FileDialog(msoFileDialogFilePicker)
