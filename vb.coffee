@@ -287,7 +287,7 @@ class VBRuntimeError extends Error
     @message = msg or @name
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  VBRuntimeError}
+                  evaluate, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e

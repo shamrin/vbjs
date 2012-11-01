@@ -1,4 +1,4 @@
-{runModule, VBRuntimeError} = require '../vb'
+{runModule, compileModule, evaluate, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 # from https://gist.github.com/734620
@@ -34,11 +34,12 @@ run = (code, expected) ->
         assert.strictEqual log, expected
     module
 
-assert_js = (module, expected_obj) ->
-    for fn, expected of expected_obj
-        match = module[fn].toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
-        body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
-        assert.strictEqual body, expected
+assert_js = (vba, expected_obj) ->
+  actual = evaluate compileModule vba
+  for fn, expected of expected_obj
+    match = actual[fn].toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
+    body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
+    assert.strictEqual body, expected
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
     fill = (s) -> if s? then s + '\n' else ''
@@ -53,7 +54,9 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
                 #{before}DoCmd.Close
                 #{after}End Function"""
 
-    assert_js runModule(code), Foo: "ns('DoCmd').dot('Close')();\n"
+    assert_js code, Foo: "ns('DoCmd').dot('Close')();\n"
+
+foo = (code) -> "Function Foo()\n  #{code}\nEnd Function"
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -63,22 +66,19 @@ suite 'Modules -', ->
         run 'DoCmd.Close', 'Close()\n'
 
     test 'bracketed', ->
-        m = runModule """Function Foo()
-                           Me.Parent![Customer Orders].Requery
-                           DoCmd.Close
-                         End Function"""
-        assert_js m,
-            Foo: """ns('Me').dot('Parent').bang('Customer Orders').dot('Requery')();
-                    ns('DoCmd').dot('Close')();\n"""
+      assert_js foo("""Me![Customer Orders].Requery
+                       DoCmd.Close"""),
+                Foo: """ns('Me').bang('Customer Orders').dot('Requery')();
+                        ns('DoCmd').dot('Close')();\n"""
 
     # SKIPPED
     if 0 then test 'function().property', ->
-        m = runModule """CurrentDb().Properties("StartupForm")"""
-        assert_js m, Foo: "ns('CurrentDb')().dot('Properties')('StartupForm');"
+      assert_js foo("""CurrentDb().Properties("StartupForm")"""),
+                Foo: "ns('CurrentDb')().dot('Properties')('StartupForm');"
 
     test 'nested dot', ->
-        assert_js run('DoCmd.Nested.Close'),
-                  Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
+      assert_js foo('DoCmd.Nested.Close'),
+                Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
 
     test 'arguments', ->
         run 'DoCmd.OpenForm "Main Switchboard", 123',
@@ -100,8 +100,7 @@ suite 'Modules -', ->
         run 'DoCmd.MoveSize (1), (2)', 'MoveSize(1,2)\n'
 
     test 'dotted argument', ->
-        assert_js run('MsgBox A.B'),
-                  Foo: "ns('MsgBox')(ns('A').dot('B'));\n"
+      assert_js foo('MsgBox A.B'), Foo: "ns('MsgBox')(ns('A').dot('B'));\n"
 
     test 'numbers', ->
         run 'DoCmd.Foo 1, 23, 456',
@@ -130,8 +129,7 @@ suite 'Modules -', ->
         run 'DoCmd.EndFunction', 'EndFunction()\n'
 
     test 'leading empty line', ->
-        m = runModule "\nFunction Foo()\nDoCmd.Close\nEnd Function"
-        assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
+      assert_js "\n#{foo 'DoCmd.Close'}", Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'empty module', ->
         runModule ''
@@ -144,10 +142,9 @@ suite 'Modules -', ->
                                        ' Decrarations end here"""
 
     test 'func_def arguments stub', ->
-        m = runModule """Sub Foo(A, B As Integer, ByVal C As Integer)
-                           DoCmd.Close
-                         End Sub"""
-        assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
+      assert_js """Sub Foo(A, B As Integer, ByVal C As Integer)
+                     DoCmd.Close
+                   End Sub""", Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'function As stub', ->
         test_foo_close after_spec: 'As Boolean'
@@ -201,11 +198,10 @@ suite 'Modules -', ->
                                   bar = False"""
 
     test 'If stub', ->
-        test_foo_close after: """FooErr:
-                                 If Err = 3270 Then
-                                     DoCmd.Bla
-                                     Resume FooExit
-                                 End If"""
+      test_foo_close after: """If Err = 3270 Then
+                                 DoCmd.Bla
+                                 Resume FooExit
+                               End If"""
 
     test 'Like stub', -> # TODO move to test/expressions.coffee
         test_foo_close before: """If Not Foo Like "[A-Z]" Then
@@ -266,13 +262,12 @@ suite 'Modules -', ->
           End Select"""
 
     test 'several functions', ->
-        m = runModule """Function Foo()
-                           DoCmd.Open
-                         End Function
-                         ' Second function
-                         Private Sub Bar()
-                           DoCmd.Close
-                         End Sub"""
-        assert_js m,
-            Foo: "ns('DoCmd').dot('Open')();\n"
-            Bar: "ns('DoCmd').dot('Close')();\n"
+      assert_js """Function Foo()
+                     DoCmd.Open
+                   End Function
+                   ' Second function
+                   Private Sub Bar()
+                     DoCmd.Close
+                   End Sub""",
+                Foo: "ns('DoCmd').dot('Open')();\n"
+                Bar: "ns('DoCmd').dot('Close')();\n"
