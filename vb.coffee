@@ -48,7 +48,16 @@ common_node_value = (n) ->
     when 'float'
       literal parseFloat(n.innerText())
     when 'like_expr'
-      n.children[0].value # FIXME it's just a stub now
+      if n.children[2]?
+        type: 'CallExpression' # /regexp/.test('string')
+        callee:
+          type: 'MemberExpression'
+          computed: no
+          object: literal new RegExp n.children[2].value.value
+          property: identifier 'test'
+        arguments: [ n.children[0].value ]
+      else
+        n.children[0].value
     when 'primary_expr'
       n.children[0].value
     when 'name'

@@ -201,10 +201,13 @@ suite 'Modules -', ->
                       ns('DoCmd').dot('Bla')();
                       }\n"""
 
-  test 'Like stub', -> # TODO move to test/expressions.coffee
-    test_foo_close before: """If Not Foo Like "[A-Z]" Then
-                                DoCmd.Bla
-                              End If"""
+  test 'Like', -> # TODO move to test/expressions.coffee
+    assert_js foo("""If Foo Like "[A-Z]" Then
+                       DoCmd.Bla
+                     End If"""),
+              Foo: """if (/[A-Z]/.test(ns('Foo'))) {
+                      ns('DoCmd').dot('Bla')();
+                      }\n"""
 
   test 'If Not EndIf stub', ->
     test_foo_close before: """If Not IsNull(Me!Photo) Then
