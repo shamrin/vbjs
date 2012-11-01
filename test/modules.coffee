@@ -238,12 +238,14 @@ suite 'Modules -', ->
                       ns('DoCmd').dot('TellAboutIt')();
                       }\n"""
 
-  test 'If Or _ stub', ->
-    test_foo_close before: """
-      If (CurrentDb().Properties("StartupForm") = "Startup" Or _
-        CurrentDb().Properties("StartupForm") = "Form.Startup") Then
-        Forms!Startup!HideStartupForm = False
-      End If"""
+  test 'If Or _', ->
+    assert_js foo("""If (CurrentDb().Properties("Form1") = "Startup" Or _
+                     CurrentDb().Properties("Form1") = "Form.Startup") Then
+                       Forms!Startup!HideStartupForm = False
+                     End If"""),
+              Foo: """if (ns('CurrentDb')().dot('Properties')('Form1') === 'Startup' || ns('CurrentDb')().dot('Properties')('Form1') === 'Form.Startup') {
+                       ns('Forms').bang('Startup').bang('HideStartupForm').let(false);
+                       }\n"""
 
   test 'If Or And', ->
     assert_js foo("""If (Aa = "") Or (0 < 1) _

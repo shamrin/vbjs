@@ -26,7 +26,7 @@ common_node_value = (n) ->
         result = if result? then operate op, result, value else value
       result
     when 'mul_op', 'add_op', 'CMP_OP', 'AND', 'OR'
-      n.innerText().replace /\s+$/, ''
+      n.innerText().replace /(\s|_)+$/, ''
     when 'start', 'value', 'identifier_expr', 'identifier_expr_part'
       n.children[0].value
     when 'identifier'
@@ -34,7 +34,7 @@ common_node_value = (n) ->
     when 'bracketed_identifier'
       n.children[1].value
     when 'name_itself'
-      n.innerText().replace /\s+$/, ''
+      n.innerText().replace /(\s|_)+$/, ''
     when 'name_in_brackets', 'lazy_name'
       n.innerText()
     when 'literal'
@@ -179,7 +179,7 @@ vb_node_value = (n) ->
       (callee) ->
         type: 'CallExpression'
         callee: callee
-        arguments: for {value} in params by 2 then literal value
+        arguments: for {value} in params by 2 then value
     when 'test_block'
       n.children[0].value
     when 'if_statement'
@@ -326,7 +326,7 @@ evaluate = (js, context) ->
   try
     f = new Function keys..., js
   catch error
-    console.log "#{error} running `#{js}`"
+    console.log "#{error} in `#{js}`"
     throw error
   f vals...
 
