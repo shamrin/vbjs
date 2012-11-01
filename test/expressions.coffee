@@ -1,4 +1,4 @@
-{evaluate, compile, VBRuntimeError} = require '../vb'
+{runExpression, compileExpression, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 run = (expr, me={}, us={}, fns={}) ->
@@ -13,7 +13,7 @@ run = (expr, me={}, us={}, fns={}) ->
                     me[name]
     for k, v of fns
         namespace[k] = v
-    evaluate expr, namespace
+    runExpression expr, namespace
 
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
@@ -60,5 +60,5 @@ suite 'Expressions -', ->
     test 'unknown us.field error', ->
         assert.throws (-> run 'Sum([Field])', {}, {}, fns), VBRuntimeError
     test 'generated code', ->
-        eq "function anonymous(ns) {\nvar me = ns('Me').dot; return me('Field');\n}",
-           compile('[Field]').toString()
+        eq "var me = ns('Me').dot; return me('Field');",
+           compileExpression('[Field]').toString()

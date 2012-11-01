@@ -241,52 +241,50 @@ call = (func_name, args) ->
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
 
-# generate JavaScript for a tree
-generate = (tree) ->
-    #console.log 'TREE:'
-    #pprint tree
-    body = "var me = ns('Me').dot; return #{escodegen.generate tree};"
-    #console.log 'CODE =', "`" + body + "`"
-    new Function 'ns', body
+compileExpression = (expr) ->
+  tree = parse 'expr', expr
+  unless tree?
+    return 'Error parsing ' + expr
+  #console.log 'TREE:'; pprint tree
+  js = "var me = ns('Me').dot; return #{escodegen.generate tree};"
+  #console.log 'JS: ', "`" + js + "`"
+  js
 
-exports.compile = (expr) ->
-    generate parse 'expr', expr
+compileModule = (code) ->
+  tree = parse 'vb', code
+  unless tree?
+    throw "Error parsing module '#{code[..150]}...'"
+  #console.log 'TREE:'; pprint tree
+  js = "return #{escodegen.generate tree};"
+  #console.log 'JS: ', "`" + js + "`"
+  js
 
-exports.evaluate = (expr, ns) ->
-    tree = parse 'expr', expr
-    if tree?
-        js = generate tree
-        js (name) ->
-            unless ns[name]?
-                throw new VBRuntimeError "'#{name}' not found in a namespace"
-            ns[name]
-    else
-        'Error parsing ' + expr
+# compile VBA expression/module and run in {ns: ns} context
+runExpression = (expr, ns) -> runJS compileExpression(expr), ns
+runModule = (code, ns) -> runJS compileModule(code), ns
 
-exports.loadmodule = (code, ns) ->
-    tree = parse 'vb', code
-    if tree?
-        #console.log 'TREE:'
-        #pprint tree
-        body = "return #{escodegen.generate tree};"
-        try
-            func = new Function 'ns', body
-        catch error
-            console.log "#{error} in `#{body}`"
-            throw error
-        #console.log 'CODE =', "`" + func + "`"
-        func (name) ->
-                unless ns[name]?
-                    throw new VBRuntimeError "VB name '#{name}' not found"
-                ns[name]
-    else
-        throw "Error parsing module '#{code[..150]}...'"
+# run JavaScript from string `js` in {ns: ns} context
+runJS = (js, ns) ->
+  evaluate js, ns: (name) ->
+                     unless ns[name]?
+                       throw new VBRuntimeError "VB name '#{name}' not found"
+                     ns[name]
+
+# better than `eval`
+evaluate = (js, context) ->
+  keys = for key, val of context then key
+  vals = for key, val of context then val
+  try
+    f = new Function keys..., js
+  catch error
+    console.log "#{error} running `#{js}`"
+    throw error
+  f vals...
 
 class VBRuntimeError extends Error
     constructor: (msg) ->
         @name = 'VBRuntimeError'
         @message = msg or @name
-exports.VBRuntimeError = VBRuntimeError
 
-# Usage: coffee vbjs.coffee "[foo]&[bar]"
-#parse process.argv[2]
+module.exports = {compileModule, compileExpression, runModule, runExpression,
+                  VBRuntimeError}

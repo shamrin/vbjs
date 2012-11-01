@@ -1,4 +1,4 @@
-{loadmodule, VBRuntimeError} = require '../vb'
+{runModule, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 # from https://gist.github.com/734620
@@ -24,7 +24,7 @@ run = (code, expected) ->
               #{code}
               End Function"""
     #console.log "code: `#{code}`"
-    module = loadmodule code, DoCmd:
+    module = runModule code, DoCmd:
                             dot: (name) ->
                                 (args...) ->
                                     spec = (repr a for a in args).join ','
@@ -33,9 +33,6 @@ run = (code, expected) ->
         module.Foo()
         assert.strictEqual log, expected
     module
-
-runmod = (code) ->
-    loadmodule code
 
 assert_js = (module, expected_obj) ->
     for fn, expected of expected_obj
@@ -56,7 +53,7 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
                 #{before}DoCmd.Close
                 #{after}End Function"""
 
-    assert_js runmod(code), Foo: "ns('DoCmd').dot('Close')();\n"
+    assert_js runModule(code), Foo: "ns('DoCmd').dot('Close')();\n"
 
 suite 'Modules -', ->
     test 'empty', ->
@@ -66,17 +63,17 @@ suite 'Modules -', ->
         run 'DoCmd.Close', 'Close()\n'
 
     test 'bracketed', ->
-        m = runmod """Function Foo()
-                        Me.Parent![Customer Orders].Requery
-                        DoCmd.Close
-                      End Function"""
+        m = runModule """Function Foo()
+                           Me.Parent![Customer Orders].Requery
+                           DoCmd.Close
+                         End Function"""
         assert_js m,
             Foo: """ns('Me').dot('Parent').bang('Customer Orders').dot('Requery')();
                     ns('DoCmd').dot('Close')();\n"""
 
     # SKIPPED
     if 0 then test 'function().property', ->
-        m = runmod """CurrentDb().Properties("StartupForm")"""
+        m = runModule """CurrentDb().Properties("StartupForm")"""
         assert_js m, Foo: "ns('CurrentDb')().dot('Properties')('StartupForm');"
 
     test 'nested dot', ->
@@ -133,11 +130,11 @@ suite 'Modules -', ->
         run 'DoCmd.EndFunction', 'EndFunction()\n'
 
     test 'leading empty line', ->
-        m = runmod "\nFunction Foo()\nDoCmd.Close\nEnd Function"
+        m = runModule "\nFunction Foo()\nDoCmd.Close\nEnd Function"
         assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'empty module', ->
-        runmod ''
+        runModule ''
 
     test 'declarations stub', ->
         test_foo_close before_func: """Option Compare Database
@@ -147,9 +144,9 @@ suite 'Modules -', ->
                                        ' Decrarations end here"""
 
     test 'func_def arguments stub', ->
-        m = runmod """Sub Foo(A, B As Integer, ByVal C As Integer)
-                      DoCmd.Close
-                      End Sub"""
+        m = runModule """Sub Foo(A, B As Integer, ByVal C As Integer)
+                           DoCmd.Close
+                         End Sub"""
         assert_js m, Foo: "ns('DoCmd').dot('Close')();\n"
 
     test 'function As stub', ->
@@ -269,13 +266,13 @@ suite 'Modules -', ->
           End Select"""
 
     test 'several functions', ->
-        m = runmod """Function Foo()
-                          DoCmd.Open
-                      End Function
-                      ' Second function
-                      Private Sub Bar()
-                          DoCmd.Close
-                      End Sub"""
+        m = runModule """Function Foo()
+                           DoCmd.Open
+                         End Function
+                         ' Second function
+                         Private Sub Bar()
+                           DoCmd.Close
+                         End Sub"""
         assert_js m,
             Foo: "ns('DoCmd').dot('Open')();\n"
             Bar: "ns('DoCmd').dot('Close')();\n"
