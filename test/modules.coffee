@@ -257,7 +257,10 @@ suite 'Modules -', ->
                       }\n"""
 
   test 'If Or CrLf', ->
-    test_foo_close before: 'If A _\r\nOr B Then\r\nC = 0\r\nEnd If'
+    assert_js foo("If A _\r\nOr B Then\r\nC = 0\r\nEnd If"),
+              Foo: """if (ns('A') || ns('B')) {
+                      ns('C').let(0);
+                      }\n"""
 
   test 'Select Case stub', ->
     test_foo_close before: """Select Case Me!ReportToPrint
