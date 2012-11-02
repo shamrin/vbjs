@@ -46,14 +46,10 @@ common_node_value = (n) ->
     when 'float'
       literal parseFloat(n.innerText())
     when 'like_expr'
-      if n.children[2]?
-        type: 'CallExpression' # /regexp/.test('string')
-        callee:
-          type: 'MemberExpression'
-          computed: no
-          object: literal new RegExp n.children[2].value.value
-          property: identifier 'test'
-        arguments: [ n.children[0].value ]
+      if n.children[2]? # /regexp/.test('string')
+        call_member literal(new RegExp n.children[2].value.value),
+                    'test',
+                    n.children[0].value
       else
         n.children[0].value
     when 'primary_expr'
@@ -148,13 +144,9 @@ vb_node_value = (n) ->
       result
     when 'member'
       (object) ->
-        type: 'CallExpression'
-        callee:
-          type: 'MemberExpression'
-          computed: no
-          object: object
-          property: identifier member n.children[0].value
-        arguments: [ literal n.children[1].value ]
+        call_member object,
+                    member(n.children[0].value),
+                    literal n.children[1].value
     when 'index'
       [l, params..., r] = n.children
       (callee) ->
@@ -187,14 +179,8 @@ vb_node_value = (n) ->
       -> n.children[n.children.length-1].value
     when 'assign_statement'
       type: 'ExpressionStatement'
-      expression:
-        type: 'CallExpression' # FIXME use AssignmentExpression?
-        callee:
-          type: 'MemberExpression'
-          computed: no
-          object: n.children[0].value
-          property: identifier 'let'
-        arguments: [ n.children[2].value ]
+      expression: # FIXME use AssignmentExpression?
+        call_member n.children[0].value, 'let', n.children[2].value
 
 expr_node_value = (n) ->
   switch n.name
@@ -216,25 +202,47 @@ expr_node_value = (n) ->
           callee: identifier 'me'
           arguments: [ result ]
       for {value: arg}, i in n.children by 2 when i > 0
-        result =
-          type: 'CallExpression'
-          callee:
-            type: 'MemberExpression'
-            computed: no
-            object: result
-            property: identifier member n.children[i-1].value
-          arguments: [ arg ]
+        result = call_member result, member(n.children[i-1].value), arg
       result
     when 'plain_call_expr'
       [{value: fn}, l, params..., r] = n.children
-      call(fn, for {value} in params by 2 then value)
+      ns_call(fn, for {value} in params by 2 then value)
     when 'lazy_call_expr'
       [{value: fn}, l, params..., r] = n.children
-      call(fn, for {value} in params by 2 then literal value)
+      ns_call(fn, for {value} in params by 2 then literal value)
     when 'lazy_name'
       n.innerText()
     when 'lazy_value'
       n.innerText()
+
+# `left` `op` `right`
+operate = (op, left, right) ->
+  type: 'BinaryExpression'
+  operator: op
+  left: left
+  right: right
+
+# ns("`func_name`")(ns, `args`...)
+ns_call = (func_name, args) ->
+  type: 'CallExpression'
+  callee:
+    type: 'CallExpression'
+    callee: identifier 'ns'
+    arguments: [literal func_name]
+  arguments: [identifier('ns')].concat args
+
+# <object>.<property>(<argument>)
+call_member = (object, property, argument) ->
+  type: 'CallExpression'
+  callee:
+    type: 'MemberExpression'
+    computed: no
+    object: object
+    property: identifier property
+  arguments: [ argument ]
+
+literal = (value) -> type: 'Literal', value: value
+identifier = (name) -> type: 'Identifier', name: name
 
 # Parse VB expression or module, and return Parser API AST [1] for escodegen.
 #
@@ -273,25 +281,6 @@ parse = (source_type, expr) ->
 
   #pprint tree
   tree.value
-
-# `left` `op` `right`
-operate = (op, left, right) ->
-  type: 'BinaryExpression'
-  operator: op
-  left: left
-  right: right
-
-# ns("`func_name`")(ns, `args`...)
-call = (func_name, args) ->
-  type: 'CallExpression'
-  callee:
-    type: 'CallExpression'
-    callee: identifier 'ns'
-    arguments: [literal func_name]
-  arguments: [identifier('ns')].concat args
-
-literal = (value) -> type: 'Literal', value: value
-identifier = (name) -> type: 'Identifier', name: name
 
 compileExpression = (expr) ->
   tree = parse 'expr', expr
