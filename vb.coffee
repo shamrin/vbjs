@@ -1,6 +1,6 @@
 escodegen = require "escodegen"
-vb_parser = require "./vb.parser"
-expr_parser = require "./expr.parser"
+vbParser = require "./vb.parser"
+exprParser = require "./expr.parser"
 
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
@@ -9,7 +9,7 @@ member = (op) -> {'.': 'dot', '!': 'bang'}[op]
 operator = (op) ->
   {'=': '===', '<>': '!==', '><': '!==', 'Or': '||', 'And': '&&'}[op] ? op
 
-common_node_value = (n) ->
+commonNodeValue = (n) ->
   switch n.name
     when '#document', 'source' # language.js nodes
       n.children?[0]?.value
@@ -47,9 +47,9 @@ common_node_value = (n) ->
       literal parseFloat(n.innerText())
     when 'like_expr'
       if n.children[2]? # /regexp/.test('string')
-        member_call literal(new RegExp n.children[2].value.value),
-                    'test',
-                    n.children[0].value
+        memberCall literal(new RegExp n.children[2].value.value),
+                   'test',
+                   n.children[0].value
       else
         n.children[0].value
     when 'primary_expr'
@@ -63,7 +63,7 @@ common_node_value = (n) ->
     when 'FALSE'
       literal false
 
-vb_node_value = (n) ->
+vbNodeValue = (n) ->
   switch n.name
     when 'or_expr', 'and_expr'
       result = n.children[0].value
@@ -133,33 +133,33 @@ vb_node_value = (n) ->
       result
     when 'member'
       (object) ->
-        member_call object,
-                    member(n.children[0].value),
-                    literal n.children[1].value
+        memberCall object,
+                   member(n.children[0].value),
+                   literal n.children[1].value
     when 'index'
       (callee) -> call callee, n.children[1].value
     when 'test_block'
       n.children[0].value
     when 'single_line_if_statement'
-      [_1, test_block, _2, then_block] = n.children
-      if_statement test_block.value, then_block.value
+      [_1, test, _2, consequent] = n.children
+      ifStatement test.value, consequent.value
     when 'if_statement'
-      [_1, test_block, then_block, else_blocks..., _2] = n.children
-      for {value: expression} in else_blocks[..].reverse()
+      [_1, test, consequent, alternates..., _2] = n.children
+      for {value: expression} in alternates[..].reverse()
         result = expression result
-      if_statement test_block.value, then_block.value, result
+      ifStatement test.value, consequent.value, result
     when 'else_if_block'
-      (alternate) -> if_statement n.children[1].value,
-                                  n.children[n.children.length-1].value,
-                                  alternate
+      (alternate) -> ifStatement n.children[1].value,
+                                 n.children[n.children.length-1].value,
+                                 alternate
     when 'else_block'
       -> n.children[n.children.length-1].value
     when 'assign_statement'
       type: 'ExpressionStatement'
       expression: # FIXME use AssignmentExpression?
-        member_call n.children[0].value, 'let', n.children[2].value
+        memberCall n.children[0].value, 'let', n.children[2].value
 
-expr_node_value = (n) ->
+exprNodeValue = (n) ->
   switch n.name
     when 'identifier'
       literal n.children[0].value
@@ -176,19 +176,19 @@ expr_node_value = (n) ->
       if result.type is 'Literal'
         result = call identifier('me'), [result]
       for {value: arg}, i in n.children by 2 when i > 0
-        result = member_call result, member(n.children[i-1].value), arg
+        result = memberCall result, member(n.children[i-1].value), arg
       result
     when 'plain_call_expr'
       [{value: fn}, l, params..., r] = n.children
-      ns_call(fn, for {value} in params by 2 then value)
+      nsCall(fn, for {value} in params by 2 then value)
     when 'lazy_call_expr'
       [{value: fn}, l, params..., r] = n.children
-      ns_call(fn, for {value} in params by 2 then literal value)
+      nsCall(fn, for {value} in params by 2 then literal value)
     when 'lazy_name', 'lazy_value'
       n.innerText()
 
 # if (`test`) { `consequent` } else { `alternate` }
-if_statement = (test, consequent, alternate = null) ->
+ifStatement = (test, consequent, alternate = null) ->
   {type: 'IfStatement', test, consequent, alternate}
 
 # `left` `operator` `right`
@@ -198,17 +198,17 @@ binary = (operator, left, right, type = 'BinaryExpression') ->
 # `callee`(`args`...)
 call = (callee, args) -> {type: 'CallExpression', callee, arguments: args}
 
-# ns("`func_name`")(ns, `args`...)
-ns_call = (func_name, args) ->
+# ns("`func`")(ns, `args`...)
+nsCall = (func, args) ->
   type: 'CallExpression'
   callee:
     type: 'CallExpression'
     callee: identifier 'ns'
-    arguments: [literal func_name]
+    arguments: [literal func]
   arguments: [identifier('ns')].concat args
 
 # <object>.<property>(<argument>)
-member_call = (object, property, argument) ->
+memberCall = (object, property, argument) ->
   type: 'CallExpression'
   callee:
     type: 'MemberExpression'
@@ -228,8 +228,8 @@ identifier = (name) -> type: 'Identifier', name: name
 # [1]: https://developer.mozilla.org/en/SpiderMonkey/Parser_API
 # [2]: https://github.com/Constellation/escodegen
 # [3]: http://esprima.org/demo/parse.html
-parse = (source_type, expr) ->
-  parser = {'vb': vb_parser, 'expr': expr_parser}[source_type]
+parse = (sourceType, expr) ->
+  parser = {'vb': vbParser, 'expr': exprParser}[sourceType]
   tree = parser.parse expr
 
   # first copy-pasted from sqld3/parse_sql.coffee
@@ -245,15 +245,15 @@ parse = (source_type, expr) ->
 
     return string
 
-  node_value = {'vb': vb_node_value, 'expr': expr_node_value}[source_type]
+  nodeValue = {'vb': vbNodeValue, 'expr': exprNodeValue}[sourceType]
   tree.traverse
     traversesTextNodes: false
     exitedNode: (n) ->
-      n.value = node_value(n) ? common_node_value(n)
+      n.value = nodeValue(n) ? commonNodeValue(n)
       #if n.name is 'start' then console.log n.toString()
 
   if not tree.value? and process?.env?.TESTING?
-    require("./test/#{source_type}.peg.js").check '<string>', expr
+    require("./test/#{sourceType}.peg.js").check '<string>', expr
 
   #pprint tree
   tree.value
