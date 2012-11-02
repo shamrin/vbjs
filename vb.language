@@ -67,7 +67,7 @@ callee = callee_with_expression / callee_name_expression
 callee_with_expression = identifier_op callee_name_expression
 callee_name_expression = name (!(argument_list EOS) index / member)*
 member = identifier_op unrestricted_name
-index = LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
+index = LEFT_PAREN argument_list RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
 
 // [MS-VBAL], 5.6.15 With Expressions

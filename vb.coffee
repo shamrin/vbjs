@@ -108,7 +108,7 @@ vb_node_value = (n) ->
       argument: null
     when 'call_statement'
       type: 'ExpressionStatement'
-      expression: call n.children[0].value, n.children[1]?.value ? []
+      expression: call n.children[0].value, n.children[1].value
     when 'callee'
       n.children[0].value
     when 'argument_list'
@@ -137,9 +137,7 @@ vb_node_value = (n) ->
                     member(n.children[0].value),
                     literal n.children[1].value
     when 'index'
-      [l, params..., r] = n.children
-      (callee) ->
-        call(callee, for {value} in params by 2 then value)
+      (callee) -> call callee, n.children[1].value
     when 'test_block'
       n.children[0].value
     when 'single_line_if_statement'
