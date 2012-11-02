@@ -113,10 +113,7 @@ vb_node_value = (n) ->
       argument: null
     when 'call_statement'
       type: 'ExpressionStatement'
-      expression:
-        type: 'CallExpression'
-        callee: n.children[0].value
-        arguments: n.children[1]?.value ? []
+      expression: call n.children[0].value, n.children[1]?.value ? []
     when 'callee'
       n.children[0].value
     when 'argument_list'
@@ -135,10 +132,7 @@ vb_node_value = (n) ->
     when 'l_expression'
       n.children[0].value
     when 'name_expression', 'callee_name_expression'
-      result =
-        type: 'CallExpression'
-        callee: identifier 'ns'
-        arguments: [ literal n.children[0].value ]
+      result = call identifier('ns'), [ literal n.children[0].value ]
       for {value: operation} in n.children[1..]
         result = operation result
       result
@@ -150,9 +144,7 @@ vb_node_value = (n) ->
     when 'index'
       [l, params..., r] = n.children
       (callee) ->
-        type: 'CallExpression'
-        callee: callee
-        arguments: for {value} in params by 2 then value
+        call(callee, for {value} in params by 2 then value)
     when 'test_block'
       n.children[0].value
     when 'single_line_if_statement'
@@ -189,10 +181,7 @@ expr_node_value = (n) ->
       #   * [MS-VBAL] 5.6.14 Dictionary Access Expressions
       result = n.children[0].value
       if result.type is 'Literal'
-        result =
-          type: 'CallExpression'
-          callee: identifier 'me'
-          arguments: [ result ]
+        result = call identifier('me'), [result]
       for {value: arg}, i in n.children by 2 when i > 0
         result = call_member result, member(n.children[i-1].value), arg
       result
@@ -215,6 +204,9 @@ operate = (op, left, right) ->
   operator: op
   left: left
   right: right
+
+# `callee`(`args`...)
+call = (callee, args) -> {type: 'CallExpression', callee, arguments: args}
 
 # ns("`func_name`")(ns, `args`...)
 ns_call = (func_name, args) ->
