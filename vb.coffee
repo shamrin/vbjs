@@ -156,7 +156,9 @@ vbNodeValue = (n) ->
       -> n.children[n.children.length-1].value
     when 'assign_statement'
       type: 'ExpressionStatement'
-      expression: # FIXME use AssignmentExpression?
+      expression:
+        # Compile to `left`.let(`right`). Why not `left` = `right`? Because
+        # JavaScript cannot assign to calls, while VBA can: a.b("c") = 42
         memberCall n.children[0].value, 'let', n.children[2].value
 
 exprNodeValue = (n) ->
