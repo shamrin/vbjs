@@ -157,24 +157,16 @@ vb_node_value = (n) ->
       n.children[0].value
     when 'single_line_if_statement'
       [_1, test_block, _2, then_block] = n.children
-      type: 'IfStatement'
-      test: test_block.value
-      consequent: then_block.value
-      alternate: null
+      if_statement test_block.value, then_block.value
     when 'if_statement'
       [_1, test_block, then_block, else_blocks..., _2] = n.children
       for {value: expression} in else_blocks[..].reverse()
         result = expression result
-      type: 'IfStatement'
-      test: test_block.value
-      consequent: then_block.value
-      alternate: result ? null
+      if_statement test_block.value, then_block.value, result
     when 'else_if_block'
-      (alternate = null) ->
-        type: 'IfStatement'
-        test: n.children[1].value
-        consequent: n.children[n.children.length-1].value
-        alternate: alternate
+      (alternate) -> if_statement n.children[1].value,
+                                  n.children[n.children.length-1].value,
+                                  alternate
     when 'else_block'
       -> n.children[n.children.length-1].value
     when 'assign_statement'
@@ -210,10 +202,12 @@ expr_node_value = (n) ->
     when 'lazy_call_expr'
       [{value: fn}, l, params..., r] = n.children
       ns_call(fn, for {value} in params by 2 then literal value)
-    when 'lazy_name'
+    when 'lazy_name', 'lazy_value'
       n.innerText()
-    when 'lazy_value'
-      n.innerText()
+
+# if (`test`) { `consequent` } else { `alternate` }
+if_statement = (test, consequent, alternate = null) ->
+  {type: 'IfStatement', test, consequent, alternate}
 
 # `left` `op` `right`
 operate = (op, left, right) ->
