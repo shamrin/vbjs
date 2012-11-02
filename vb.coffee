@@ -27,10 +27,8 @@ common_node_value = (n) ->
       result
     when 'mul_op', 'add_op', 'CMP_OP', 'AND', 'OR'
       n.innerText().replace /(\s|_)+$/, ''
-    when 'start', 'value', 'identifier_expr', 'identifier_expr_part'
+    when 'start', 'value'
       n.children[0].value
-    when 'identifier'
-      literal n.children[0].value
     when 'bracketed_identifier'
       n.children[1].value
     when 'name_itself'
@@ -62,9 +60,6 @@ common_node_value = (n) ->
       n.children[0].value
     when 'name'
       n.children[0].value
-    when 'plain_call_expr'
-      [{value: fn}, l, params..., r] = n.children
-      call(fn, for {value} in params by 2 then value)
     when 'braced_expression'
       n.children[1].value
     when 'TRUE'
@@ -115,9 +110,7 @@ vb_node_value = (n) ->
     when 'statements'
       type: 'BlockStatement'
       body: for {value} in n.children when value? then value
-    when 'single_line_statement', 'multiline_statement'
-      n.children[0].value
-    when 'statement'
+    when 'single_line_statement', 'multiline_statement', 'statement'
       n.children[0].value
     when 'exit_statement'
       type: 'ReturnStatement'
@@ -134,24 +127,6 @@ vb_node_value = (n) ->
       for {value} in n.children by 2 then value
     when 'positional_argument'
       n.children[0]?.value ? {type: 'Identifier', name: 'undefined'}
-    when 'identifier_expr_itself'
-      # [A].[B]![C] => ns('A').dot('B').bang('C')
-      result = n.children[0].value
-      if result.type is 'Literal'
-        result =
-          type: 'CallExpression'
-          callee: identifier 'ns'
-          arguments: [ result ]
-      for {value: arg}, i in n.children by 2 when i > 0
-        result =
-          type: 'CallExpression'
-          callee:
-            type: 'MemberExpression'
-            computed: no
-            object: result
-            property: identifier member n.children[i-1].value
-          arguments: [ arg ]
-      result
     when 'not_expr'
       if n.children[1]?
         type: 'UnaryExpression'
@@ -160,6 +135,8 @@ vb_node_value = (n) ->
       else
         n.children[0].value
     when 'unrestricted_name'
+      n.children[0].value
+    when 'l_expression'
       n.children[0].value
     when 'name_expression', 'callee_name_expression'
       result =
@@ -221,12 +198,17 @@ vb_node_value = (n) ->
 
 expr_node_value = (n) ->
   switch n.name
+    when 'identifier'
+      literal n.children[0].value
+    when 'identifier_expr', 'identifier_expr_part'
+      n.children[0].value
     when 'identifier_expr_itself'
       # [A].[B]![C] => me('A').dot('B').bang('C')
       # About bang ! operator semantics:
       #   * http://stackoverflow.com/q/4804947
       #   * http://stackoverflow.com/q/2923957
       #   * http://www.cpearson.com/excel/DefaultMember.aspx
+      #   * [MS-VBAL] 5.6.14 Dictionary Access Expressions
       result = n.children[0].value
       if result.type is 'Literal'
         result =
@@ -243,6 +225,9 @@ expr_node_value = (n) ->
             property: identifier member n.children[i-1].value
           arguments: [ arg ]
       result
+    when 'plain_call_expr'
+      [{value: fn}, l, params..., r] = n.children
+      call(fn, for {value} in params by 2 then value)
     when 'lazy_call_expr'
       [{value: fn}, l, params..., r] = n.children
       call(fn, for {value} in params by 2 then literal value)

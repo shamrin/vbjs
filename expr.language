@@ -17,6 +17,16 @@ lazy_value
 lazy_name = 'Sum' _
 
 identifier_expr = identifier_expr_itself
+identifier_expr_itself = identifier_expr_part (identifier_op identifier_expr_part)*
+identifier_expr_part
+    = plain_call_expr
+    / identifier
+identifier
+    = bracketed_identifier
+    / name
+plain_call_expr
+    = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
+
 name = name_itself
 
 // optional whitespace

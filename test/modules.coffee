@@ -195,6 +195,10 @@ suite 'Modules -', ->
               Foo: """ns('foo').let('Foo');
                       ns('bar').let(false);\n"""
 
+  test 'complex assign', ->
+    assert_js foo('CurrentDb().Properties("StartupForm") = "Form1"'),
+              Foo: "ns('CurrentDb')().dot('Properties')('StartupForm').let('Form1');\n"
+
   test 'simple If', ->
     assert_js foo("""If Bar Then
                        DoCmd.Bla

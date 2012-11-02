@@ -7,9 +7,6 @@ like_expr = primary_expr (LIKE expression)?
 
 braced_expression = LEFT_PAREN expression RIGHT_PAREN
 
-plain_call_expr
-    = name LEFT_PAREN (expression (comma expression)* )? RIGHT_PAREN
-
 value
     = literal
     / TRUE
@@ -17,14 +14,6 @@ value
     / float
     / number
 
-identifier_expr_itself = identifier_expr_part (identifier_op identifier_expr_part)*
-identifier_expr_part
-    = plain_call_expr
-    / identifier
-
-identifier
-    = bracketed_identifier
-    / name
 bracketed_identifier = '[' name_in_brackets ']' _
 name_in_brackets = [A-Za-z_][A-Za-z0-9_ ]*
 literal = '"' literal_text '"' _
