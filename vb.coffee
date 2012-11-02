@@ -47,7 +47,7 @@ common_node_value = (n) ->
       literal parseFloat(n.innerText())
     when 'like_expr'
       if n.children[2]? # /regexp/.test('string')
-        call_member literal(new RegExp n.children[2].value.value),
+        member_call literal(new RegExp n.children[2].value.value),
                     'test',
                     n.children[0].value
       else
@@ -133,7 +133,7 @@ vb_node_value = (n) ->
       result
     when 'member'
       (object) ->
-        call_member object,
+        member_call object,
                     member(n.children[0].value),
                     literal n.children[1].value
     when 'index'
@@ -157,7 +157,7 @@ vb_node_value = (n) ->
     when 'assign_statement'
       type: 'ExpressionStatement'
       expression: # FIXME use AssignmentExpression?
-        call_member n.children[0].value, 'let', n.children[2].value
+        member_call n.children[0].value, 'let', n.children[2].value
 
 expr_node_value = (n) ->
   switch n.name
@@ -176,7 +176,7 @@ expr_node_value = (n) ->
       if result.type is 'Literal'
         result = call identifier('me'), [result]
       for {value: arg}, i in n.children by 2 when i > 0
-        result = call_member result, member(n.children[i-1].value), arg
+        result = member_call result, member(n.children[i-1].value), arg
       result
     when 'plain_call_expr'
       [{value: fn}, l, params..., r] = n.children
@@ -208,7 +208,7 @@ ns_call = (func_name, args) ->
   arguments: [identifier('ns')].concat args
 
 # <object>.<property>(<argument>)
-call_member = (object, property, argument) ->
+member_call = (object, property, argument) ->
   type: 'CallExpression'
   callee:
     type: 'MemberExpression'
