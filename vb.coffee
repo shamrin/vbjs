@@ -21,9 +21,9 @@ common_node_value = (n) ->
         result = if result? then operate '+', result, value else value
       result
     when 'add_expr', 'mul_expr'
-      for {value}, i in n.children by 2
-        op = n.children[i-1]?.value
-        result = if result? then operate op, result, value else value
+      result = n.children[0].value
+      for {value}, i in n.children by 2 when i > 0
+        result = operate n.children[i-1]?.value, result, value
       result
     when 'mul_op', 'add_op', 'CMP_OP', 'AND', 'OR'
       n.innerText().replace /(\s|_)+$/, ''
@@ -66,15 +66,13 @@ common_node_value = (n) ->
 vb_node_value = (n) ->
   switch n.name
     when 'or_expr', 'and_expr'
-      for {value}, i in n.children by 2
+      result = n.children[0].value
+      for {value}, i in n.children by 2 when i > 0
         result =
-          if result?
-            type: 'LogicalExpression'
-            operator: operator n.children[i-1].value
-            left: result
-            right: value
-          else
-            value
+          type: 'LogicalExpression'
+          operator: operator n.children[i-1].value
+          left: result
+          right: value
       result
     when 'cmp_expr'
       result = n.children[0].value
