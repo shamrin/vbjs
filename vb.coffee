@@ -18,12 +18,12 @@ common_node_value = (n) ->
     when 'concat_expr'
       result = if n.children[1]? then literal '' # force string
       for {value}, i in n.children by 2
-        result = if result? then operate '+', result, value else value
+        result = if result? then binary '+', result, value else value
       result
     when 'add_expr', 'mul_expr'
       result = n.children[0].value
       for {value}, i in n.children by 2 when i > 0
-        result = operate n.children[i-1]?.value, result, value
+        result = binary n.children[i-1]?.value, result, value
       result
     when 'mul_op', 'add_op', 'CMP_OP', 'AND', 'OR'
       n.innerText().replace /(\s|_)+$/, ''
@@ -68,16 +68,13 @@ vb_node_value = (n) ->
     when 'or_expr', 'and_expr'
       result = n.children[0].value
       for {value}, i in n.children by 2 when i > 0
-        result =
-          type: 'LogicalExpression'
-          operator: operator n.children[i-1].value
-          left: result
-          right: value
+        result = binary operator(n.children[i-1].value), result, value,
+                        'LogicalExpression'
       result
     when 'cmp_expr'
       result = n.children[0].value
       if (right = n.children[2]?.value)?
-        result = operate operator(n.children[1].value), result, right
+        result = binary operator(n.children[1].value), result, right
       result
     when 'module'
       n.children[2].value
@@ -196,12 +193,9 @@ expr_node_value = (n) ->
 if_statement = (test, consequent, alternate = null) ->
   {type: 'IfStatement', test, consequent, alternate}
 
-# `left` `op` `right`
-operate = (op, left, right) ->
-  type: 'BinaryExpression'
-  operator: op
-  left: left
-  right: right
+# `left` `operator` `right`
+binary = (operator, left, right, type = 'BinaryExpression') ->
+  {type, operator, left, right}
 
 # `callee`(`args`...)
 call = (callee, args) -> {type: 'CallExpression', callee, arguments: args}
