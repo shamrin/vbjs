@@ -279,11 +279,44 @@ compileModule = (code) ->
   js
 
 # compile VBA expression/module and run in {ns: ns} context
+# TODO runExpression: separate `[bla]` from `bla`
 runExpression = (expr, ns) -> runJS compileExpression(expr), ns
 runModule = (code, ns) -> runJS compileModule(code), ns
 
+# `VBObject` wraps arbitrary nested objects that have `dot` and `dotobj` keys.
+#
+# It passes through to `dot` method or implements the `dot` method via
+# `dotobj` key. Why have this level of indirection? JavaScript doesn't
+# have feature similar to Python's __getattr__, and we want to get
+# helpful errors when certain key is not found (VBRuntimeError).
+#
+# Usage:
+#   ns = new VBObject {dotobj: Me: dotobj: {bla: 1}}, 'ns'
+#   console.log ns.dot('Me').dot('bla') => 1
+#   console.log ns.dot('Me').dot('foo') => VBRuntimeError
+class VBObject
+
+  @suitable: (obj) -> obj.dot? or obj.dotobj? or obj.bang?
+
+  constructor: (@object, @name='') ->
+    @dot = if @object.dotobj? then @_dot else @object.dot
+    @bang = @object.bang
+
+  _dot: (name) =>
+    unless @object.dotobj[name]?
+      throw new VBRuntimeError "'#{name}' not found in '#{@name}'"
+    r = @object.dotobj[name]
+    if VBObject.suitable r
+      new VBObject r, "#{@name}.#{name}"
+    else
+      r
+
+  toString: -> "<VBObject(#{@object},'#{@name}')"
+
 # run JavaScript from string `js` in {ns: ns} context
 runJS = (js, ns) ->
+  for k, v of ns when VBObject.suitable v
+    ns[k] = new VBObject v, "ns.#{k}"
   evaluate js, ns: (name) ->
                      unless ns[name]?
                        throw new VBRuntimeError "VB name '#{name}' not found"

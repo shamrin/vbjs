@@ -2,15 +2,7 @@
 assert = require 'assert'
 
 run = (expr, me={}, us={}, fns={}) ->
-    namespace =
-        _Us: dot: (name) ->
-                    unless us[name]?
-                      throw new VBRuntimeError "'#{name}' not found in a _Us"
-                    us[name]
-        Me: dot: (name) ->
-                    unless me[name]?
-                      throw new VBRuntimeError "'#{name}' not found in a Me"
-                    me[name]
+    namespace = _Us: {dotobj: us}, Me: {dotobj: me}
     for k, v of fns
         namespace[k] = v
     runExpression expr, namespace
@@ -39,8 +31,7 @@ suite 'Expressions -', ->
     test 'identifier operators', ->
         eq 'Total: 10', run '"Total: " & [Some Subform].[Form]![Subtotal]',
                         'Some Subform':
-                            dot: (f) -> {Form:
-                                            bang: (g) -> {Subtotal: 10}[g]}[f]
+                            dotobj: Form: bang: (g) -> {Subtotal: 10}[g]
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
