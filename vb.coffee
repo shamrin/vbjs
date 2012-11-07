@@ -1,6 +1,8 @@
-escodegen = require "escodegen"
-vbParser = require "./vb.parser"
-exprParser = require "./expr.parser"
+{isEqual} = require 'underscore'
+escodegen = require 'escodegen'
+
+vbParser = require './vb.parser'
+exprParser = require './expr.parser'
 
 repr = (arg) -> require('util').format '%j', arg
 pprint = (arg) -> console.log require('util').inspect arg, false, null
@@ -82,22 +84,40 @@ vbNodeValue = (n) ->
       type: 'ObjectExpression'
       properties: (value for {value} in n.children ? [])
     when 'func_def'
-      name = n.children[1].value
-      body = n.children[3].value
+      [_1, name, args, body] = n.children
+
+      # HACK traverse AST and replace all of `ns('argname')` with `argname`
+      argnames = for a in args.value then a.name
+      traverse = (obj) ->
+        for k, v of obj when typeof v isnt 'string'
+          found = no
+          for argname in argnames
+            if isEqual v, call identifier('ns'), [literal argname]
+              obj[k] = identifier argname
+              found = yes
+              break
+          traverse v unless found
+      traverse body.value
+
       type: 'Property'
       key:
         type: 'Literal'
-        value: name
+        value: name.value
       value:
         type: 'FunctionExpression'
         id: null
-        params: []
+        params: args.value
         defaults: []
-        body: body
+        body: body.value
         rest: null
         generator: false
         expression: false
       kind: 'init'
+    when 'args_spec'
+      [l, args..., r, _1, _2] = n.children
+      for arg in args by 2 then arg.value
+    when 'arg_spec'
+      identifier n.children[1].value
     when 'statements'
       type: 'BlockStatement'
       body: for {value} in n.children when value? then value

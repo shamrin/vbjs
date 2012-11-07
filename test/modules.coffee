@@ -1,3 +1,4 @@
+{isArray, isRegExp} = require 'underscore'
 {runModule, compileModule, evaluate, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
@@ -36,9 +37,13 @@ run = (code, expected) ->
 assert_js = (vba, expected_obj) ->
   actual = evaluate compileModule vba
   for fn, expected of expected_obj
-    match = actual[fn].toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
-    body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
-    assert.strictEqual body, expected
+    if isRegExp expected
+      assert.ok actual[fn].toString().match(expected),
+                "#{expected} doesn't match '#{actual[fn]}'"
+    else
+      match = actual[fn].toString().match /^function \(\) \{\s*([\s\S]*)\s*\}$/
+      body = match[1].replace /\s*\n\s*/g, '\n' # eat whitespaces around \n
+      assert.strictEqual body, expected
 
 test_foo_close = ({before, after, after_spec, before_func}) ->
   fill = (s) -> if s? then s + '\n' else ''
@@ -139,10 +144,11 @@ suite 'Modules -', ->
                                      Dim path As String
                                      ' Decrarations end here"""
 
-  test 'func_def arguments stub', ->
-    assert_js """Sub Foo(A, B As Integer, ByVal C As Integer)
-                   DoCmd.Close
-                 End Sub""", Foo: "ns('DoCmd').dot('Close')();\n"
+  test 'func_def arguments', ->
+    assert_js """Sub Foo(S, M As Integer, ByVal N As Integer)
+                   DoCmd.Bar S, M
+                 End Sub""",
+              Foo: /^function \(S, M, N\) \{\s*ns\('DoCmd'\).dot\('Bar'\)\(S, M\);\s*\}$/
 
   test 'function As stub', ->
     test_foo_close after_spec: 'As Boolean'
