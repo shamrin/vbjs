@@ -12,7 +12,7 @@ repr = (o, depth=0, max=2) ->
       when 'function' then 'function'
       when 'object'
         if o is null then 'null'
-        if _.isArray o
+        if isArray o
           '[' + [''+repr(e, depth + 1, max) for e in o] + ']'
         else
           '{' + [''+k+':'+repr(o[k], depth + 1, max) for k in _.keys(o)] + '}'
