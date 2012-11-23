@@ -320,7 +320,10 @@ class VBObject
 
   constructor: (@object, @name='') ->
     @dot = if @object.dotobj? then @_dot else @object.dot
-    @bang = @object.bang
+
+    # Note: we fall back to @dot if no @object.bang is defined. It's not 100%
+    # correct, but most of the time `.` and `!` are indeed the same in VB.
+    @bang = if @object.bang then @object.bang else @dot
 
   _dot: (name) =>
     unless @object.dotobj[name]?
