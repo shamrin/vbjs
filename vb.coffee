@@ -318,29 +318,36 @@ class VBObject
 
   @suitable: (obj) -> obj.dot? or obj.dotobj? or obj.bang?
 
-  constructor: (@object, @name='') ->
-    if @object.dotobj?
-      @dot = @_dot
-      for k, v of @object.dotobj
-        delete @object.dotobj[k]
-        @object.dotobj[k.toLowerCase()] = v
+  @wrap: (obj, name) ->
+    if VBObject.suitable obj
+      new VBObject obj, "#{@name}.#{name}"
     else
-      @dot = @object.dot
+      obj
 
-    # Note: we fall back to @dot if no @object.bang is defined. It's not 100%
+  constructor: (object, @name='') ->
+    if object.dotobj?
+      @dot = @_dot
+      @dotobj = lowerObjectKeys object.dotobj
+    else
+      @dot = object.dot
+
+    # Note: we fall back to @dot if no object.bang is defined. It's not 100%
     # correct, but most of the time `.` and `!` are indeed the same in VB.
-    @bang = if @object.bang then @object.bang else @dot
+    @bang = if object.bang then object.bang else @dot
 
   _dot: (name) =>
-    unless @object.dotobj[name.toLowerCase()]?
+    unless @dotobj[name.toLowerCase()]?
       throw new VBRuntimeError "'#{name}' not found in '#{@name}'"
-    r = @object.dotobj[name.toLowerCase()]
-    if VBObject.suitable r
-      new VBObject r, "#{@name}.#{name}"
-    else
-      r
+    VBObject.wrap @dotobj[name.toLowerCase()], "#{@name}.#{name}"
 
-  toString: -> "<VBObject(#{@object},'#{@name}')"
+  toString: -> "<VBObject('#{@name}')"
+
+# return a copy of `obj` with its keys converted to lowercase
+lowerObjectKeys = (obj) ->
+  o = {}
+  for k, v of obj
+    o[k.toLowerCase()] = v
+  o
 
 # run JavaScript from string `js` in {ns: ns} context
 # `ns` - VBObject-producing function (or it will be turned into such function)
@@ -348,14 +355,12 @@ runJS = (js, ns) ->
   ns = nsFunction ns unless isFunction ns
   evaluate js, ns: ns
 
-# make VBObject-producing error-catching function from an object
+# make VBObject-producing, error-catching function from an object
 nsFunction = (obj) ->
+  obj = lowerObjectKeys obj
   for k, v of obj
-    delete obj[k]
-    obj[k.toLowerCase()] = if VBObject.suitable(v)
-                             new VBObject v, "ns.#{k}"
-                           else
-                             v
+    obj[k] = VBObject.wrap v, "ns.#{k}"
+
   (name) ->
     unless obj[name.toLowerCase()]?
       throw new VBRuntimeError "VB name '#{name}' not found"
