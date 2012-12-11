@@ -1,4 +1,4 @@
-{isEqual, isFunction} = require 'underscore'
+{isEqual, isFunction, object} = require 'underscore'
 escodegen = require 'escodegen'
 
 vbParser = require './vb.parser'
@@ -152,8 +152,8 @@ vbNodeValue = (n) ->
         result = operation result
       result
     when 'member'
-      (object) ->
-        memberCall object,
+      (obj) ->
+        memberCall obj,
                    member(n.children[0].value),
                    literal n.children[1].value
     when 'index'
@@ -229,13 +229,13 @@ nsCall = (func, args) ->
     arguments: [literal func]
   arguments: args
 
-# <object>.<property>(<argument>)
-memberCall = (object, property, argument) ->
+# <obj>.<property>(<argument>)
+memberCall = (obj, property, argument) ->
   type: 'CallExpression'
   callee:
     type: 'MemberExpression'
     computed: no
-    object: object
+    object: obj
     property: identifier property
   arguments: [ argument ]
 
@@ -318,36 +318,31 @@ class VBObject
 
   @suitable: (obj) -> obj.dot? or obj.dotobj? or obj.bang?
 
-  @wrap: (obj, name) ->
-    if VBObject.suitable obj
-      new VBObject obj, "#{@name}.#{name}"
-    else
-      obj
-
-  constructor: (object, @name='') ->
-    if object.dotobj?
+  constructor: (obj, @name='') ->
+    if obj.dotobj?
       @dot = @_dot
-      @dotobj = lowerObjectKeys object.dotobj
+      @dotobj = wrapObject obj.dotobj, @name
     else
-      @dot = object.dot
+      @dot = obj.dot
 
-    # Note: we fall back to @dot if no object.bang is defined. It's not 100%
+    # Note: we fall back to @dot if no obj.bang is defined. It's not 100%
     # correct, but most of the time `.` and `!` are indeed the same in VB.
-    @bang = if object.bang then object.bang else @dot
+    @bang = if obj.bang then obj.bang else @dot
 
   _dot: (name) =>
     unless @dotobj[name.toLowerCase()]?
       throw new VBRuntimeError "'#{name}' not found in '#{@name}'"
-    VBObject.wrap @dotobj[name.toLowerCase()], "#{@name}.#{name}"
+    @dotobj[name.toLowerCase()]
 
   toString: -> "<VBObject('#{@name}')"
 
-# return a copy of `obj` with its keys converted to lowercase
-lowerObjectKeys = (obj) ->
-  o = {}
-  for k, v of obj
-    o[k.toLowerCase()] = v
-  o
+# return a copy of `obj` with its keys lowercased and values wrapped
+wrapObject = (obj, name) ->
+  object([k.toLowerCase(), if VBObject.suitable v
+                             new VBObject v, "#{name}.#{k}"
+                           else
+                             v] \
+         for k, v of obj)
 
 # run JavaScript from string `js` in {ns: ns} context
 # `ns` - VBObject-producing function (or it will be turned into such function)
@@ -355,12 +350,9 @@ runJS = (js, ns) ->
   ns = nsFunction ns unless isFunction ns
   evaluate js, ns: ns
 
-# make VBObject-producing, error-catching function from an object
+# make VBObject-producing, error-catching function from an object `obj`
 nsFunction = (obj) ->
-  obj = lowerObjectKeys obj
-  for k, v of obj
-    obj[k] = VBObject.wrap v, "ns.#{k}"
-
+  obj = wrapObject obj, 'ns'
   (name) ->
     unless obj[name.toLowerCase()]?
       throw new VBRuntimeError "VB name '#{name}' not found"
