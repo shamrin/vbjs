@@ -1,4 +1,4 @@
-{isEqual} = require 'underscore'
+{isEqual, isFunction} = require 'underscore'
 escodegen = require 'escodegen'
 
 vbParser = require './vb.parser'
@@ -220,14 +220,14 @@ binary = (operator, left, right, type = 'BinaryExpression') ->
 # `callee`(`args`...)
 call = (callee, args) -> {type: 'CallExpression', callee, arguments: args}
 
-# ns("`func`")(ns, `args`...)
+# ns("`func`")(`args`...)
 nsCall = (func, args) ->
   type: 'CallExpression'
   callee:
     type: 'CallExpression'
     callee: identifier 'ns'
     arguments: [literal func]
-  arguments: [identifier('ns')].concat args
+  arguments: args
 
 # <object>.<property>(<argument>)
 memberCall = (object, property, argument) ->
@@ -337,13 +337,19 @@ class VBObject
   toString: -> "<VBObject(#{@object},'#{@name}')"
 
 # run JavaScript from string `js` in {ns: ns} context
+# `ns` - VBObject-producing function (or it will be turned into such function)
 runJS = (js, ns) ->
-  for k, v of ns when VBObject.suitable v
-    ns[k] = new VBObject v, "ns.#{k}"
-  evaluate js, ns: (name) ->
-                     unless ns[name]?
-                       throw new VBRuntimeError "VB name '#{name}' not found"
-                     ns[name]
+  ns = nsFunction ns unless isFunction ns
+  evaluate js, ns: ns
+
+# make VBObject-producing error-catching function from an object
+nsFunction = (obj) ->
+  for k, v of obj when VBObject.suitable v
+    obj[k] = new VBObject v, "ns.#{k}"
+  (name) ->
+    unless obj[name]?
+      throw new VBRuntimeError "VB name '#{name}' not found"
+    obj[name]
 
 # better than `eval`
 evaluate = (js, context) ->
@@ -362,7 +368,7 @@ class VBRuntimeError extends Error
     @message = msg or @name
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  evaluate, VBRuntimeError}
+                  nsFunction, evaluate, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e

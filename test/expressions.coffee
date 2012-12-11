@@ -1,18 +1,20 @@
-{runExpression, compileExpression, VBRuntimeError} = require '../vb'
+{runExpression, compileExpression, nsFunction,
+                                   VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
-run = (expr, me={}, us={}, fns={}) ->
+run = (expr, me={}, us={}, get_fns=null) ->
     namespace = _Us: {dotobj: us}, Me: {dotobj: me}
-    for k, v of fns
+    if get_fns
+      for k, v of get_fns nsFunction namespace
         namespace[k] = v
     runExpression expr, namespace
 
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
 nancy = FirstName: 'Nancy', LastName: 'Davolio'
-fns =
-    Abs: (ns, expr) -> Math.abs(expr)
-    Sum: (ns, expr) ->
+get_fns = (ns) ->
+    Abs: (expr) -> Math.abs(expr)
+    Sum: (expr) ->
         # TODO implement Sum in VBA, using CurrentDb.OpenRecordset or DBEngine
         field = {'[Field]': 'Field'}[expr]
         sum = 0
@@ -35,21 +37,21 @@ suite 'Expressions -', ->
     test 'addition', ->
         eq 20, run '[Subtotal]+[Freight]', Subtotal: 13, Freight: 7
     test 'functions', ->
-        eq 30, run 'Abs([Field])', {Field: -30}, {}, fns
+        eq 30, run 'Abs([Field])', {Field: -30}, {}, get_fns
     test 'lazy functions', ->
-        eq 40, run 'Sum([Field])', {}, {Field: [10, 10, 20]}, fns
+        eq 40, run 'Sum([Field])', {}, {Field: [10, 10, 20]}, get_fns
     test 'arithmetic', ->
         eq 5, run '[A] / [B] + [C] * [D] - [E]', A: 9, B: 3, C: 2, D: 3, E: 4
     test 'float', ->
         eq 2.0, run '[A] + 0.5', A: 1.5
     test 'nested calls', ->
-        eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, fns
+        eq 60, run 'Abs(Sum([Field]))', {}, {Field: [10, 20, -90]}, get_fns
     test 'unknown function error' , ->
         assert.throws (-> run 'Foo([F])', {F: 123}), VBRuntimeError
     test 'unknown me.field error', ->
         assert.throws (-> run '[Field]'), VBRuntimeError
     test 'unknown us.field error', ->
-        assert.throws (-> run 'Sum([Field])', {}, {}, fns), VBRuntimeError
+        assert.throws (-> run 'Sum([Field])', {}, {}, get_fns), VBRuntimeError
     test 'generated code', ->
         eq "var me = ns('Me').dot; return me('Field');",
            compileExpression('[Field]').toString()
