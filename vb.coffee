@@ -319,16 +319,22 @@ class VBObject
   @suitable: (obj) -> obj.dot? or obj.dotobj? or obj.bang?
 
   constructor: (@object, @name='') ->
-    @dot = if @object.dotobj? then @_dot else @object.dot
+    if @object.dotobj?
+      @dot = @_dot
+      for k, v of @object.dotobj
+        delete @object.dotobj[k]
+        @object.dotobj[k.toLowerCase()] = v
+    else
+      @dot = @object.dot
 
     # Note: we fall back to @dot if no @object.bang is defined. It's not 100%
     # correct, but most of the time `.` and `!` are indeed the same in VB.
     @bang = if @object.bang then @object.bang else @dot
 
   _dot: (name) =>
-    unless @object.dotobj[name]?
+    unless @object.dotobj[name.toLowerCase()]?
       throw new VBRuntimeError "'#{name}' not found in '#{@name}'"
-    r = @object.dotobj[name]
+    r = @object.dotobj[name.toLowerCase()]
     if VBObject.suitable r
       new VBObject r, "#{@name}.#{name}"
     else
@@ -344,12 +350,16 @@ runJS = (js, ns) ->
 
 # make VBObject-producing error-catching function from an object
 nsFunction = (obj) ->
-  for k, v of obj when VBObject.suitable v
-    obj[k] = new VBObject v, "ns.#{k}"
+  for k, v of obj
+    delete obj[k]
+    obj[k.toLowerCase()] = if VBObject.suitable(v)
+                             new VBObject v, "ns.#{k}"
+                           else
+                             v
   (name) ->
-    unless obj[name]?
+    unless obj[name.toLowerCase()]?
       throw new VBRuntimeError "VB name '#{name}' not found"
-    obj[name]
+    obj[name.toLowerCase()]
 
 # better than `eval`
 evaluate = (js, context) ->

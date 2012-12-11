@@ -55,3 +55,5 @@ suite 'Expressions -', ->
     test 'generated code', ->
         eq "var me = ns('Me').dot; return me('Field');",
            compileExpression('[Field]').toString()
+    test 'case insensitive function name', ->
+        eq 30, run 'aBs([Field])', {Field: -30}, {}, get_fns
