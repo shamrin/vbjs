@@ -303,14 +303,6 @@ compileModule = (code) ->
 runExpression = (expr, ns) -> runJS compileExpression(expr), ns
 runModule = (code, ns) -> runJS compileModule(code), ns
 
-# return a copy of `obj` with its keys lowercased and values wrapped
-wrapObject = (obj, name) ->
-  object([k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
-                             nsObject v, "#{name}.#{k}"
-                           else
-                             v] \
-         for k, v of obj)
-
 # run JavaScript from string `js` in {ns: ns} context
 # `ns` - namespace, will be wrapped with nsFunction (if not already wrapped)
 runJS = (js, ns) ->
@@ -319,7 +311,14 @@ runJS = (js, ns) ->
 
 # return error-catching function that wraps access to `obj`, recursively
 nsFunction = (obj, name = 'ns') ->
-  obj = wrapObject obj, name
+
+  # lowercase obj keys and (recursively) wrap values with nsObject
+  obj = object([k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
+                                   nsObject v, "#{name}.#{k}"
+                                 else
+                                   v] \
+               for k, v of obj)
+
   (key) ->
     unless obj[key.toLowerCase()]?
       throw new VBRuntimeError "VB name '#{key}' not found"
