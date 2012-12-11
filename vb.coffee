@@ -303,7 +303,29 @@ compileModule = (code) ->
 runExpression = (expr, ns) -> runJS compileExpression(expr), ns
 runModule = (code, ns) -> runJS compileModule(code), ns
 
-# `VBObject` wraps arbitrary nested objects that have `dot` and `dotobj` keys.
+# return a copy of `obj` with its keys lowercased and values wrapped
+wrapObject = (obj, name) ->
+  object([k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
+                             nsObject v, "#{name}.#{k}"
+                           else
+                             v] \
+         for k, v of obj)
+
+# run JavaScript from string `js` in {ns: ns} context
+# `ns` - namespace, will be wrapped with nsFunction (if not already wrapped)
+runJS = (js, ns) ->
+  ns = nsFunction ns unless isFunction ns
+  evaluate js, ns: ns
+
+# return error-catching function that wraps access to `obj`, recursively
+nsFunction = (obj, name = 'ns') ->
+  obj = wrapObject obj, name
+  (key) ->
+    unless obj[key.toLowerCase()]?
+      throw new VBRuntimeError "VB name '#{key}' not found"
+    obj[key.toLowerCase()]
+
+# `nsObject` wraps arbitrary nested objects that have `dot` and `dotobj` keys.
 #
 # It passes through to `dot` method or implements the `dot` method via
 # `dotobj` key. Why have this level of indirection? JavaScript doesn't
@@ -311,52 +333,20 @@ runModule = (code, ns) -> runJS compileModule(code), ns
 # helpful errors when certain key is not found (VBRuntimeError).
 #
 # Usage:
-#   ns = new VBObject {dotobj: Me: dotobj: {bla: 1}}, 'ns'
+#   ns = nsObject {dotobj: Me: dotobj: {bla: 1}}, 'ns'
 #   console.log ns.dot('Me').dot('bla') => 1
 #   console.log ns.dot('Me').dot('foo') => VBRuntimeError
-class VBObject
+nsObject = (obj, name) ->
+  dot = if obj.dotobj?
+          nsFunction obj.dotobj, name
+        else
+          obj.dot
 
-  @suitable: (obj) -> obj.dot? or obj.dotobj? or obj.bang?
+  # Note: we fall back to dot if no obj.bang is defined. It's not 100%
+  # correct, but most of the time `.` and `!` are indeed the same in VB.
+  bang = if obj.bang? then obj.bang else dot
 
-  constructor: (obj, @name='') ->
-    if obj.dotobj?
-      @dot = @_dot
-      @dotobj = wrapObject obj.dotobj, @name
-    else
-      @dot = obj.dot
-
-    # Note: we fall back to @dot if no obj.bang is defined. It's not 100%
-    # correct, but most of the time `.` and `!` are indeed the same in VB.
-    @bang = if obj.bang then obj.bang else @dot
-
-  _dot: (name) =>
-    unless @dotobj[name.toLowerCase()]?
-      throw new VBRuntimeError "'#{name}' not found in '#{@name}'"
-    @dotobj[name.toLowerCase()]
-
-  toString: -> "<VBObject('#{@name}')"
-
-# return a copy of `obj` with its keys lowercased and values wrapped
-wrapObject = (obj, name) ->
-  object([k.toLowerCase(), if VBObject.suitable v
-                             new VBObject v, "#{name}.#{k}"
-                           else
-                             v] \
-         for k, v of obj)
-
-# run JavaScript from string `js` in {ns: ns} context
-# `ns` - VBObject-producing function (or it will be turned into such function)
-runJS = (js, ns) ->
-  ns = nsFunction ns unless isFunction ns
-  evaluate js, ns: ns
-
-# make VBObject-producing, error-catching function from an object `obj`
-nsFunction = (obj) ->
-  obj = wrapObject obj, 'ns'
-  (name) ->
-    unless obj[name.toLowerCase()]?
-      throw new VBRuntimeError "VB name '#{name}' not found"
-    obj[name.toLowerCase()]
+  {dot, bang}
 
 # better than `eval`
 evaluate = (js, context) ->
