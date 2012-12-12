@@ -1,13 +1,12 @@
-{runExpression, compileExpression, nsFunction,
-                                   VBRuntimeError} = require '../vb'
+{runExpression, compileExpression, nsObject, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 run = (expr, me={}, us={}, get_fns=null) ->
     namespace = _Us: {dotobj: us}, Me: {dotobj: me}
     if get_fns
-      for k, v of get_fns nsFunction namespace
+      for k, v of get_fns nsObject {dotobj: namespace}
         namespace[k] = v
-    runExpression expr, namespace
+    runExpression expr, {dotobj: namespace}
 
 eq = (expected, actual, msg) -> assert.strictEqual actual, expected, msg
 
@@ -18,7 +17,7 @@ get_fns = (ns) ->
         # TODO implement Sum in VBA, using CurrentDb.OpenRecordset or DBEngine
         field = {'[Field]': 'Field'}[expr]
         sum = 0
-        for val in ns('_Us').dot(field) then sum += val
+        for val in ns.dot('_Us').dot(field) then sum += val
         sum
 
 suite 'Expressions -', ->
@@ -53,7 +52,7 @@ suite 'Expressions -', ->
     test 'unknown us.field error', ->
         assert.throws (-> run 'Sum([Field])', {}, {}, get_fns), VBRuntimeError
     test 'generated code', ->
-        eq "var me = ns('Me').dot; return me('Field');",
+        eq "ns = ns.dot; var me = ns('Me').dot; return me('Field');",
            compileExpression('[Field]').toString()
     test 'case insensitive function name', ->
         eq 30, run 'aBs([Field])', {Field: -30}, {}, get_fns

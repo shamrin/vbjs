@@ -285,7 +285,7 @@ compileExpression = (expr) ->
   unless tree?
     return 'Error parsing ' + expr
   #console.log 'TREE:'; pprint tree
-  js = "var me = ns('Me').dot; return #{escodegen.generate tree};"
+  js = "ns = ns.dot; var me = ns('Me').dot; return #{escodegen.generate tree};"
   #console.log 'JS: ', "`" + js + "`"
   js
 
@@ -294,7 +294,8 @@ compileModule = (code) ->
   unless tree?
     throw "Error parsing module '#{code[..150]}...'"
   #console.log 'TREE:'; pprint tree
-  js = "return #{escodegen.generate tree};"
+  js = """if(typeof ns !== 'undefined') ns = ns.dot;
+          return #{escodegen.generate tree};"""
   #console.log 'JS: ', "`" + js + "`"
   js
 
@@ -304,38 +305,21 @@ runExpression = (expr, ns) -> runJS compileExpression(expr), ns
 runModule = (code, ns) -> runJS compileModule(code), ns
 
 # run JavaScript from string `js` in {ns: ns} context
-# `ns` - namespace, will be wrapped with nsFunction (if not already wrapped)
-runJS = (js, ns) ->
-  ns = nsFunction ns unless isFunction ns
-  evaluate js, ns: ns
+# `ns` is a namespace object to be wrapped with nsObject
+runJS = (js, ns) -> evaluate js, ns: nsObject ns
 
-# return error-catching function that wraps access to `obj`, recursively
-nsFunction = (obj, name = 'ns') ->
-
-  # lowercase obj keys and (recursively) wrap values with nsObject
-  obj = object([k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
-                                   nsObject v, "#{name}.#{k}"
-                                 else
-                                   v] \
-               for k, v of obj)
-
-  (key) ->
-    unless obj[key.toLowerCase()]?
-      throw new VBRuntimeError "VB name '#{key}' not found"
-    obj[key.toLowerCase()]
-
-# `nsObject` wraps arbitrary nested objects that have `dot` and `dotobj` keys.
+# recursively wrap namespace objects that have dot, dotobj, bang attributes
 #
 # It passes through to `dot` method or implements the `dot` method via
-# `dotobj` key. Why have this level of indirection? JavaScript doesn't
-# have feature similar to Python's __getattr__, and we want to get
-# helpful errors when certain key is not found (VBRuntimeError).
+# `dotobj` attribute. Why the indirection? JavaScript has no feature similar
+# to Python's __getattr__, and we want to get helpful errors when an
+# attribute is not found (VBRuntimeError).
 #
 # Usage:
 #   ns = nsObject {dotobj: Me: dotobj: {bla: 1}}, 'ns'
 #   console.log ns.dot('Me').dot('bla') => 1
 #   console.log ns.dot('Me').dot('foo') => VBRuntimeError
-nsObject = (obj, name) ->
+nsObject = (obj = {}, name = 'ns') ->
   dot = if obj.dotobj?
           nsFunction obj.dotobj, name
         else
@@ -346,6 +330,21 @@ nsObject = (obj, name) ->
   bang = if obj.bang? then obj.bang else dot
 
   {dot, bang}
+
+# return error-catching function that wraps (case-insensitive) access to `obj`
+nsFunction = (obj, name) ->
+
+  # lowercase obj keys and (recursively) wrap values with nsObject
+  obj = object(for k, v of obj
+                 [k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
+                                     nsObject v, "#{name}.#{k}"
+                                   else
+                                     v])
+
+  (key) ->
+    unless obj[key.toLowerCase()]?
+      throw new VBRuntimeError "VB name '#{key}' not found in '#{name}"
+    obj[key.toLowerCase()]
 
 # better than `eval`
 evaluate = (js, context) ->
@@ -364,7 +363,7 @@ class VBRuntimeError extends Error
     @message = msg or @name
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  nsFunction, evaluate, VBRuntimeError}
+                  nsObject, evaluate, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e

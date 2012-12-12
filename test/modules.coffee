@@ -26,10 +26,11 @@ run = (code, expected) ->
             End Function"""
   #console.log "code: `#{code}`"
   module = runModule code,
-                     DoCmd: dot: (name) ->
-                                   (args...) ->
-                                     spec = (repr a for a in args).join ','
-                                     log.push "#{name}(#{spec})"
+                     dotobj:
+                       DoCmd: dot: (name) ->
+                                     (args...) ->
+                                       spec = (repr a for a in args).join ','
+                                       log.push "#{name}(#{spec})"
   module.Foo()
   assert.strictEqual log.join('\n'), expected
   module
