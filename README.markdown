@@ -1,6 +1,30 @@
-## Current status
+## JavaScript API
 
-Compiling `Startup` module from Microsoft Access&reg; Northwind sample database:
+```javascript
+var fs = require('fs')
+var vb = require('vb');
+
+var Close = function() {
+    console.log('Close');
+};
+var OpenForm = function(name) {
+    console.log('OpenForm ' + name);
+}
+
+var m = vb.runModule(fs.readFileSync('nwind_Startup.bas'),
+                     { dotobj:
+                         { DoCmd:
+                            { dotobj:
+                               { Close: Close, OpenForm: OpenForm }}}});
+
+m.CloseForm();
+// -> Close
+// -> OpenForm 'Main Switchboard'
+```
+
+`nwind_Startup.bas` was taken from Microsoft Access&reg; Northwind sample database `Startup` module.
+
+## Command line usage
 
 ```sh
 $ cat nwind_Startup.bas | coffee vb.coffee
@@ -10,45 +34,11 @@ Result:
 
 ```javascript
 return {
-    'OpenStartup': function () {
-        if (ns('IsItAReplica')()) {
-            ns('DoCmd').dot('Close')();
-        } else {
-            if (ns('CurrentDb')().dot('Properties')('StartupForm') === 'Startup' || ns('CurrentDb')().dot('Properties')('StartupForm') === 'Form.Startup') {
-                ns('Forms').bang('Startup').bang('HideStartupForm').let(false);
-            } else {
-                ns('Forms').bang('Startup').bang('HideStartupForm').let(true);
-            }
-        }
-        return;
-        if (ns('Err') === ns('conPropertyNotFound')) {
-            ns('Forms').bang('Startup').bang('HideStartupForm').let(true);
-        }
-    },
-    'HideStartupForm': function () {
-        if (ns('Forms').bang('Startup').bang('HideStartupForm')) {
-            ns('CurrentDb')().dot('Properties')('StartupForm').let('Main SwitchBoard');
-        } else {
-            ns('CurrentDb')().dot('Properties')('StartupForm').let('Startup');
-        }
-        return;
-        if (ns('Err') === ns('conPropertyNotFound')) {
-            ns('db').dot('Properties').dot('Append')(ns('prop'));
-        }
-    },
+    ..
     'CloseForm': function () {
         ns('DoCmd').dot('Close')();
         ns('DoCmd').dot('OpenForm')('Main Switchboard');
     },
-    'IsItAReplica': function () {
-        ns('blnReturnValue').let(false);
-        if (ns('CurrentDb')().dot('Properties')('Replicable') === 'T') {
-            ns('blnReturnValue').let(true);
-        } else {
-            ns('blnReturnValue').let(false);
-        }
-        ns('IsItAReplica').let(ns('blnReturnValue'));
-        return;
-    }
+    ...
 };
 ```
