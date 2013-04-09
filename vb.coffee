@@ -55,7 +55,18 @@ commonNodeValue = (n) ->
       else
         n.children[0].value
     when 'primary_expr'
-      n.children[0].value
+      v = n.children[0].value
+
+      # add .get() to finish up .dot(...), .bang(...), (...) expressions
+      if v?.type == 'CallExpression' \
+            #and not isEqual(v.callee, identifier 'ns') \
+            and not (v.callee.type == 'MemberExpression' \
+                     and isEqual(v.callee.property, identifier 'get'))
+        #console.log 'PRIMARY_EXPR', n.children[0].innerText(), v, 'YES'
+        memberCall v, 'get'
+      else
+        #console.log 'PRIMARY_EXPR', n.children[0].innerText(), v, 'NO'
+        v
     when 'name'
       n.children[0].value
     when 'braced_expression'
@@ -86,13 +97,14 @@ vbNodeValue = (n) ->
     when 'func_def'
       [_1, name, args, body] = n.children
 
-      # HACK traverse AST and replace all of `ns('argname')` with `argname`
+      # HACK traverse AST and replace all of `ns('arg').get()` with `arg`
       argnames = for a in args.value then a.name
       traverse = (obj) ->
         for k, v of obj when typeof v isnt 'string'
           found = no
           for argname in argnames
-            if isEqual v, call identifier('ns'), [literal argname]
+            if isEqual v, memberCall \
+                            call(identifier('ns'), [literal argname]), 'get'
               obj[k] = identifier argname
               found = yes
               break
@@ -229,15 +241,15 @@ nsCall = (func, args) ->
     arguments: [literal func]
   arguments: args
 
-# <obj>.<property>(<argument>)
-memberCall = (obj, property, argument) ->
+# <obj>.<property>(<args>...)
+memberCall = (obj, property, args...) ->
   type: 'CallExpression'
   callee:
     type: 'MemberExpression'
     computed: no
     object: obj
     property: identifier property
-  arguments: [ argument ]
+  arguments: args
 
 literal = (value) -> type: 'Literal', value: value
 identifier = (name) -> type: 'Identifier', name: name
