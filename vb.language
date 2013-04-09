@@ -70,7 +70,7 @@ member = identifier_op unrestricted_name
 index = LEFT_PAREN argument_list RIGHT_PAREN
 unrestricted_name = bracketed_identifier / name_itself
 
-// [MS-VBAL], 5.6.15 With Expressions
+// [MS-VBAL], 5.6.15 With Expressions (used inside With blocks)
 with_expression = identifier_op name_expression
 name_expression = name (index / member)*
 l_expression = with_expression / name_expression
