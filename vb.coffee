@@ -232,14 +232,9 @@ binary = (operator, left, right, type = 'BinaryExpression') ->
 # `callee`(`args`...)
 call = (callee, args) -> {type: 'CallExpression', callee, arguments: args}
 
-# ns("`func`")(`args`...)
+# ns.get("`func`")(`args`...)
 nsCall = (func, args) ->
-  type: 'CallExpression'
-  callee:
-    type: 'CallExpression'
-    callee: identifier 'ns'
-    arguments: [literal func]
-  arguments: args
+  call memberCall(identifier('ns'), 'get', literal func), args
 
 # <obj>.<property>(<args>...)
 memberCall = (obj, property, args...) ->
@@ -317,8 +312,8 @@ runExpression = (expr, ns) -> runJS compileExpression(expr), ns
 runModule = (code, ns) -> runJS compileModule(code), ns
 
 # run JavaScript from string `js` in {ns: ns} context
-# `ns` is a namespace object to be wrapped with nsObject
-runJS = (js, ns) -> evaluate js, ns: nsObject ns
+# `ns` must be an object with `VBObject` interface
+runJS = (js, ns) -> evaluate js, ns: ns
 
 # recursively wrap namespace objects that have dot, dotobj, bang attributes
 #
@@ -374,8 +369,50 @@ class VBRuntimeError extends Error
     @name = 'VBRuntimeError'
     @message = msg or @name
 
+class VBObject
+  constructor: ({attrs, @default, @type, @bang}) ->
+    # lowercase keys
+    @attrs = object([k.toLowerCase(), v] for k, v of attrs)
+
+    # Fall back to `dot` if no `bang` function is provided. It's not 100%
+    # correct, but most of the time `.` and `!` are indeed the same in VB.
+    @bang ?= @dot
+
+  dot: (attr) ->
+    new Attribute this, attr
+
+  get: (attr = @default) ->
+    @attrs[@_lower attr]
+
+  let: (attr, value) ->
+    @attrs[@_lower attr] = value
+
+  _lower: (attr) ->
+    lower = attr.toLowerCase()
+    unless @attrs[lower]?
+      throw new VBRuntimeError "#{@type} has no attribute '#{attr}'"
+    lower
+
+class Attribute
+  constructor: (@object, @attr) ->
+
+  dot: (attr) ->
+    @object.get(@attr).dot(attr)
+
+  bang: (attr) ->
+    @object.get(@attr).bang(attr)
+
+  get: (attr) ->
+    if attr?
+      @object.get(@attr).get(attr)
+    else
+      @object.get(@attr)
+
+  let: (value) ->
+    @object.let(@attr, value)
+
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  nsObject, evaluate, VBRuntimeError}
+                  nsObject, VBObject, evaluate, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e
