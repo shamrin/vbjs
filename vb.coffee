@@ -313,45 +313,7 @@ runModule = (code, ns) -> runJS compileModule(code), ns
 # `ns` must be an object with `VBObject` interface
 runJS = (js, ns) -> evaluate js, ns: ns
 
-# recursively wrap namespace objects that have dot, dotobj, bang attributes
-#
-# It passes through to `dot` method or implements the `dot` method via
-# `dotobj` attribute. Why the indirection? JavaScript has no feature similar
-# to Python's __getattr__, and we want to get helpful errors when an
-# attribute is not found (VBRuntimeError).
-#
-# Usage:
-#   ns = nsObject {dotobj: Me: dotobj: {bla: 1}}, 'ns'
-#   console.log ns.dot('Me').dot('bla') => 1
-#   console.log ns.dot('Me').dot('foo') => VBRuntimeError
-nsObject = (obj = {}, name = 'ns') ->
-  dot = if obj.dotobj?
-          nsFunction obj.dotobj, name
-        else
-          obj.dot
-
-  # Note: we fall back to dot if no obj.bang is defined. It's not 100%
-  # correct, but most of the time `.` and `!` are indeed the same in VB.
-  bang = if obj.bang? then obj.bang else dot
-
-  {dot, bang}
-
-# return error-catching function that wraps (case-insensitive) access to `obj`
-nsFunction = (obj, name) ->
-
-  # lowercase obj keys and (recursively) wrap values with nsObject
-  obj = object(for k, v of obj
-                 [k.toLowerCase(), if v.dot? or v.dotobj? or v.bang?
-                                     nsObject v, "#{name}.#{k}"
-                                   else
-                                     v])
-
-  (key) ->
-    unless obj[key.toLowerCase()]?
-      throw new VBRuntimeError "VB name '#{key}' not found in '#{name}"
-    obj[key.toLowerCase()]
-
-# better than `eval`
+# better `eval`
 evaluate = (js, context) ->
   keys = for key, val of context then key
   vals = for key, val of context then val
@@ -434,7 +396,7 @@ class Attribute
     @object.let(@attr, value)
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  nsObject, VBObject, evaluate, VBRuntimeError}
+                  VBObject, evaluate, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e
