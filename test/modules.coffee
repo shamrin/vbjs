@@ -1,5 +1,5 @@
 {isArray, isRegExp} = require 'underscore'
-{runModule, compileModule, evaluate, VBRuntimeError} = require '../vb'
+{runModule, compileModule, evaluate, VBObject, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 # from https://gist.github.com/734620
@@ -26,11 +26,12 @@ run = (code, expected) ->
             End Function"""
   #console.log "code: `#{code}`"
   module = runModule code,
-                     dotobj:
-                       DoCmd: dot: (name) ->
-                                     (args...) ->
-                                       spec = (repr a for a in args).join ','
-                                       log.push "#{name}(#{spec})"
+                     new VBObject
+                       attrs: DoCmd: new VBObject
+                         dot: (name) ->
+                                (args...) ->
+                                  spec = (repr a for a in args).join ','
+                                  log.push "#{name}(#{spec})"
   module.Foo()
   assert.strictEqual log.join('\n'), expected
   module

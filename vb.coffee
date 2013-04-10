@@ -369,9 +369,13 @@ class VBRuntimeError extends Error
     @message = msg or @name
 
 class VBObject
-  constructor: ({attrs, @default, @type, @bang}) ->
-    # lowercase keys
-    @attrs = object([k.toLowerCase(), v] for k, v of attrs)
+  # Use `dot` argument for tests and debugging only
+  constructor: ({attrs, @default, @type, @bang, dot}) ->
+    if dot?
+      @dot = dot
+    else
+      # lowercase keys
+      @attrs = object([k.toLowerCase(), v] for k, v of attrs)
 
     # Fall back to `dot` if no `bang` function is provided. It's not 100%
     # correct, but most of the time `.` and `!` are indeed the same in VB.
