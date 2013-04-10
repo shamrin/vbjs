@@ -97,14 +97,13 @@ vbNodeValue = (n) ->
     when 'func_def'
       [_1, name, args, body] = n.children
 
-      # HACK traverse AST and replace all of `ns('arg').get()` with `arg`
+      # HACK traverse AST and replace all of `ns.get('arg')` with `arg`
       argnames = for a in args.value then a.name
       traverse = (obj) ->
         for k, v of obj when typeof v isnt 'string'
           found = no
           for argname in argnames
-            if isEqual v, memberCall \
-                            call(identifier('ns'), [literal argname]), 'get'
+            if isEqual v, memberCall identifier('ns'), 'get', literal argname
               obj[k] = identifier argname
               found = yes
               break

@@ -150,7 +150,7 @@ suite 'Modules -', ->
     assert_js """Sub Foo(S, M As Integer, ByVal N As Integer)
                    DoCmd.Bar S, M
                  End Sub""",
-              Foo: /^function \(S, M, N\) \{\s*ns\('DoCmd'\).dot\('Bar'\)\(S, M\);\s*\}$/
+              Foo: /^function \(S, M, N\) \{\s*ns\.get\('DoCmd'\)\.dot\('Bar'\)\(S, M\);\s*\}$/
 
   test 'function As stub', ->
     test_foo_close after_spec: 'As Boolean'
