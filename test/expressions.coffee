@@ -59,7 +59,7 @@ suite 'Expressions -', ->
     test 'unknown us.field error', ->
         assert.throws (-> run 'Sum([Field])', {}, {}, get_fns), VBRuntimeError
     test 'generated code', ->
-        eq "ns = ns.dot; var me = ns('Me').dot; return me('Field').get();",
+        eq "var me = ns.get('Me'); return me.dot('Field').get();",
            compileExpression('[Field]').toString()
     test 'case insensitive function name', ->
         eq 30, run 'aBs([Field])', {Field: obj -30}, {}, get_fns

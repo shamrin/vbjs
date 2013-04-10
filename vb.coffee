@@ -208,7 +208,7 @@ exprNodeValue = (n) ->
       #   * [MS-VBAL] 5.6.14 Dictionary Access Expressions
       result = n.children[0].value
       if result.type is 'Literal'
-        result = call identifier('me'), [result]
+        result = memberCall identifier('me'), 'dot', result
       for {value: arg}, i in n.children by 2 when i > 0
         result = memberCall result, member(n.children[i-1].value), arg
       result
@@ -297,7 +297,7 @@ compileExpression = (expr) ->
   unless tree?
     return 'Error parsing ' + expr
   #console.log 'TREE:'; pprint tree
-  js = "ns = ns.dot; var me = ns('Me').dot; return #{escodegen.generate tree};"
+  js = "var me = ns.get('Me'); return #{escodegen.generate tree};"
   #console.log 'JS: ', "`" + js + "`"
   js
 
