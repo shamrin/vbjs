@@ -367,6 +367,24 @@ class VBRuntimeError extends Error
     @name = 'VBRuntimeError'
     @message = msg or @name
 
+# `VBObject` wraps `{attrs, default, type}` objects.
+#
+# It gives error-catching, case-insensitive interface to underlying `attrs`
+# via .dot(), .get(), .let() methods. E.g.:
+#
+#     o = new VBObject
+#               type: 'TextBox'
+#               attrs: {visible: true, value: 'foo'}
+#               default: 'value'
+#
+#     o.dot('visible').get() # => true
+#     o.get('Visible') # => true
+#     o.get('value') # => 'foo'
+#     o.get() # => 'foo'
+#
+#     o.let('value', 'bar')
+#     o.get() # => bar
+#
 class VBObject
   # Use `dot` argument for tests and debugging only
   constructor: ({attrs, @default, @type, @bang, dot}) ->
@@ -395,6 +413,8 @@ class VBObject
       throw new VBRuntimeError "#{@type} has no attribute '#{attr}'"
     lower
 
+# `Attribute` is used to defer `.dot(attr)` lookups in VBObject instances.
+# TODO use it to defer `.bang()` lookups too
 class Attribute
   constructor: (@object, @attr) ->
 
