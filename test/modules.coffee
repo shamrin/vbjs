@@ -83,7 +83,7 @@ suite 'Modules -', ->
 
   test 'nested dot', ->
     assert_js foo('DoCmd.Nested.Close'),
-              Foo: "ns('DoCmd').dot('Nested').dot('Close')();\n"
+              Foo: "ns.get('DoCmd').dot('Nested').dot('Close')();\n"
 
   test 'arguments', ->
     run 'DoCmd.OpenForm "Main Switchboard", 123',

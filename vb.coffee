@@ -159,7 +159,7 @@ vbNodeValue = (n) ->
     when 'l_expression'
       n.children[0].value
     when 'name_expression', 'callee_name_expression'
-      result = call identifier('ns'), [ literal n.children[0].value ]
+      result = memberCall identifier('ns'), 'get', literal n.children[0].value
       for {value: operation} in n.children[1..]
         result = operation result
       result
@@ -301,8 +301,7 @@ compileModule = (code) ->
   unless tree?
     throw "Error parsing module '#{code[..150]}...'"
   #console.log 'TREE:'; pprint tree
-  js = """if(typeof ns !== 'undefined') ns = ns.dot;
-          return #{escodegen.generate tree};"""
+  js = "return #{escodegen.generate tree};"
   #console.log 'JS: ', "`" + js + "`"
   js
 
