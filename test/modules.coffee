@@ -59,7 +59,7 @@ test_foo_close = ({before, after, after_spec, before_func}) ->
             #{before}DoCmd.Close
             #{after}End Function"""
 
-  assert_js code, Foo: "ns('DoCmd').dot('Close')();\n"
+  assert_js code, Foo: "ns.get('DoCmd').dot('Close')();\n"
 
 foo = (code) -> "Function Foo()\n  #{code}\nEnd Function"
 
@@ -73,13 +73,13 @@ suite 'Modules -', ->
   test 'bracketed', ->
     assert_js foo("""Me![Customer Orders].Requery
                      DoCmd.Close"""),
-              Foo: """ns('Me').bang('Customer Orders').dot('Requery')();
-                      ns('DoCmd').dot('Close')();\n"""
+              Foo: """ns.get('Me').bang('Customer Orders').dot('Requery')();
+                      ns.get('DoCmd').dot('Close')();\n"""
 
   # SKIPPED
   if 0 then test 'function().property', ->
     assert_js foo("""CurrentDb().Properties("StartupForm")"""),
-              Foo: "ns('CurrentDb')().dot('Properties')('StartupForm');"
+              Foo: "ns.get('CurrentDb')().dot('Properties')('StartupForm');"
 
   test 'nested dot', ->
     assert_js foo('DoCmd.Nested.Close'),
@@ -105,7 +105,7 @@ suite 'Modules -', ->
     run 'DoCmd.MoveSize (1), (2)', 'MoveSize(1,2)'
 
   test 'dotted argument', ->
-    assert_js foo('MsgBox A.B'), Foo: "ns('MsgBox')(ns('A').dot('B').get());\n"
+    assert_js foo('MsgBox A.B'), Foo: "ns.get('MsgBox')(ns.get('A').dot('B').get());\n"
 
   test 'numbers', ->
     run 'DoCmd.Foo 1, 23, 456', 'Foo(1,23,456)'
@@ -133,7 +133,7 @@ suite 'Modules -', ->
     run 'DoCmd.EndFunction', 'EndFunction()'
 
   test 'leading empty line', ->
-    assert_js "\n#{foo 'DoCmd.Close'}", Foo: "ns('DoCmd').dot('Close')();\n"
+    assert_js "\n#{foo 'DoCmd.Close'}", Foo: "ns.get('DoCmd').dot('Close')();\n"
 
   test 'empty module', ->
     runModule ''
@@ -199,12 +199,12 @@ suite 'Modules -', ->
   test 'assign', ->
     assert_js foo("""foo = "Foo"
                      bar = False"""),
-              Foo: """ns('foo').let('Foo');
-                      ns('bar').let(false);\n"""
+              Foo: """ns.get('foo').let('Foo');
+                      ns.get('bar').let(false);\n"""
 
   test 'complex assign', ->
     assert_js foo('CurrentDb().Properties("StartupForm") = "Form1"'),
-              Foo: "ns('CurrentDb')().dot('Properties')('StartupForm').let('Form1');\n"
+              Foo: "ns.get('CurrentDb')().dot('Properties')('StartupForm').let('Form1');\n"
 
   test 'assign real-life', ->
     assert_js foo("""If [type] = 1 Then
@@ -212,34 +212,34 @@ suite 'Modules -', ->
                      Else
                        n1.Visible = False
                      End If"""),
-              Foo: """if (ns('type').get() === 1) {
-                      ns('n1').dot('Visible').let(true);
+              Foo: """if (ns.get('type') === 1) {
+                      ns.get('n1').dot('Visible').let(true);
                       } else {
-                      ns('n1').dot('Visible').let(false);
+                      ns.get('n1').dot('Visible').let(false);
                       }\n"""
 
   test 'simple If', ->
     assert_js foo("""If Bar Then
                        DoCmd.Bla
                      End If"""),
-              Foo: """if (ns('Bar').get()) {
-                      ns('DoCmd').dot('Bla')();
+              Foo: """if (ns.get('Bar')) {
+                      ns.get('DoCmd').dot('Bla')();
                       }\n"""
 
   test 'Like', -> # TODO move to test/expressions.coffee
     assert_js foo("""If Foo Like "[A-Z]" Then
                        DoCmd.Bla
                      End If"""),
-              Foo: """if (/[A-Z]/.test(ns('Foo').get())) {
-                      ns('DoCmd').dot('Bla')();
+              Foo: """if (/[A-Z]/.test(ns.get('Foo'))) {
+                      ns.get('DoCmd').dot('Bla')();
                       }\n"""
 
   test 'If Not EndIf', ->
     assert_js foo("""If Not IsNull(Me!Photo) Then
                        hideImageFrame
                      EndIf"""),
-              Foo: """if (!ns('IsNull')(ns('Me').bang('Photo').get()).get()) {
-                      ns('hideImageFrame')();
+              Foo: """if (!ns.get('IsNull')(ns.get('Me').bang('Photo').get()).get()) {
+                      ns.get('hideImageFrame')();
                       }\n"""
 
   test 'If ElseIf Else', ->
@@ -251,26 +251,26 @@ suite 'Modules -', ->
                        DoCmd.DoA
                        DoCmd.DoB
                      End If"""),
-              Foo: """if (ns('IsIt')().get()) {
-                      ns('DoCmd').dot('DoA')();
-                      } else if (ns('IsLoaded')('Product List').get()) {
-                      ns('DoCmd').dot('OpenForm')(ns('strDocName').get());
+              Foo: """if (ns.get('IsIt')().get()) {
+                      ns.get('DoCmd').dot('DoA')();
+                      } else if (ns.get('IsLoaded')('Product List').get()) {
+                      ns.get('DoCmd').dot('OpenForm')(ns.get('strDocName'));
                       } else {
-                      ns('DoCmd').dot('DoA')();
-                      ns('DoCmd').dot('DoB')();
+                      ns.get('DoCmd').dot('DoA')();
+                      ns.get('DoCmd').dot('DoB')();
                       }\n"""
 
   test 'If single line', ->
     assert_js foo("If IsItReplica() Then DoCmd.TellAboutIt"),
-              Foo: """if (ns('IsItReplica')().get())
-                      ns('DoCmd').dot('TellAboutIt')();\n"""
+              Foo: """if (ns.get('IsItReplica')().get())
+                      ns.get('DoCmd').dot('TellAboutIt')();\n"""
 
   test 'Condition in braces', ->
     assert_js foo("""If (IsItReplica()) Then
                        DoCmd.TellAboutIt
                      End If"""),
-              Foo: """if (ns('IsItReplica')().get()) {
-                      ns('DoCmd').dot('TellAboutIt')();
+              Foo: """if (ns.get('IsItReplica')().get()) {
+                      ns.get('DoCmd').dot('TellAboutIt')();
                       }\n"""
 
   test 'If Or _', ->
@@ -278,8 +278,8 @@ suite 'Modules -', ->
                      CurrentDb().Properties("Form1") = "Form.Startup") Then
                        Forms!Startup!HideStartupForm = False
                      End If"""),
-              Foo: """if (ns('CurrentDb')().dot('Properties')('Form1').get() === 'Startup' || ns('CurrentDb')().dot('Properties')('Form1').get() === 'Form.Startup') {
-                       ns('Forms').bang('Startup').bang('HideStartupForm').let(false);
+              Foo: """if (ns.get('CurrentDb')().dot('Properties')('Form1').get() === 'Startup' || ns.get('CurrentDb')().dot('Properties')('Form1').get() === 'Form.Startup') {
+                       ns.get('Forms').bang('Startup').bang('HideStartupForm').let(false);
                        }\n"""
 
   test 'If Or And', ->
@@ -287,14 +287,14 @@ suite 'Modules -', ->
                          Or (1 <> 2) And (D >= 5) Then
                        Bar
                      End If"""),
-              Foo: """if (ns('Aa').get() === '' || 0 < 1 || 1 !== 2 && ns('D').get() >= 5) {
-                      ns('Bar')();
+              Foo: """if (ns.get('Aa') === '' || 0 < 1 || 1 !== 2 && ns.get('D') >= 5) {
+                      ns.get('Bar')();
                       }\n"""
 
   test 'If Or CrLf', ->
     assert_js foo("If A _\r\nOr B Then\r\nC = 0\r\nEnd If"),
-              Foo: """if (ns('A').get() || ns('B').get()) {
-                      ns('C').let(0);
+              Foo: """if (ns.get('A') || ns.get('B')) {
+                      ns.get('C').let(0);
                       }\n"""
 
   test 'Select Case stub', ->
@@ -316,5 +316,5 @@ suite 'Modules -', ->
                  Private Sub Bar()
                    DoCmd.Close
                  End Sub""",
-              Foo: "ns('DoCmd').dot('Open')();\n"
-              Bar: "ns('DoCmd').dot('Close')();\n"
+              Foo: "ns.get('DoCmd').dot('Open')();\n"
+              Bar: "ns.get('DoCmd').dot('Close')();\n"
