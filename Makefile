@@ -9,13 +9,16 @@ all: expr.parser.js vb.parser.js
 test/%.peg.js: %.language common.language test/pegjs_build
 	cat $< | ./preprocess | test/pegjs_build $<_preprocessed > $@
 
-test: test/vb.peg.js vb.parser.js test/expr.peg.js expr.parser.js
+doctest:
+	doctest test/vbobject.js
+
+test: test/vb.peg.js vb.parser.js test/expr.peg.js expr.parser.js doctest
     # Usage:
     #     $ make test TEST="grep pattern"
     ifdef TEST
-	env TESTING=1 mocha --compilers coffee:coffee-script -u tdd -g "$(TEST)"
+	env TESTING=1 mocha --compilers coffee:coffee-script -u tdd -g "$(TEST)" test/*.coffee
     else
-	env TESTING=1 mocha --compilers coffee:coffee-script -u tdd
+	env TESTING=1 mocha --compilers coffee:coffee-script -u tdd test/*.coffee
     endif
 
-.PHONY: test
+.PHONY: test doctest
