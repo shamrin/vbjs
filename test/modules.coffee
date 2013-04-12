@@ -213,7 +213,7 @@ suite 'Modules -', ->
                      Else
                        n1.Visible = False
                      End If"""),
-              Foo: """if (ns.get('type') === 1) {
+              Foo: """if (ns.get('type').get() === 1) {
                       ns.get('n1').dot('Visible').let(true);
                       } else {
                       ns.get('n1').dot('Visible').let(false);
@@ -223,7 +223,7 @@ suite 'Modules -', ->
     assert_js foo("""If Bar Then
                        DoCmd.Bla
                      End If"""),
-              Foo: """if (ns.get('Bar')) {
+              Foo: """if (ns.get('Bar').get()) {
                       ns.get('DoCmd').dot('Bla')();
                       }\n"""
 
@@ -231,7 +231,7 @@ suite 'Modules -', ->
     assert_js foo("""If Foo Like "[A-Z]" Then
                        DoCmd.Bla
                      End If"""),
-              Foo: """if (/[A-Z]/.test(ns.get('Foo'))) {
+              Foo: """if (/[A-Z]/.test(ns.get('Foo').get())) {
                       ns.get('DoCmd').dot('Bla')();
                       }\n"""
 
@@ -255,7 +255,7 @@ suite 'Modules -', ->
               Foo: """if (ns.get('IsIt')().get()) {
                       ns.get('DoCmd').dot('DoA')();
                       } else if (ns.get('IsLoaded')('Product List').get()) {
-                      ns.get('DoCmd').dot('OpenForm')(ns.get('strDocName'));
+                      ns.get('DoCmd').dot('OpenForm')(ns.get('strDocName').get());
                       } else {
                       ns.get('DoCmd').dot('DoA')();
                       ns.get('DoCmd').dot('DoB')();
@@ -288,13 +288,13 @@ suite 'Modules -', ->
                          Or (1 <> 2) And (D >= 5) Then
                        Bar
                      End If"""),
-              Foo: """if (ns.get('Aa') === '' || 0 < 1 || 1 !== 2 && ns.get('D') >= 5) {
+              Foo: """if (ns.get('Aa').get() === '' || 0 < 1 || 1 !== 2 && ns.get('D').get() >= 5) {
                       ns.get('Bar')();
                       }\n"""
 
   test 'If Or CrLf', ->
     assert_js foo("If A _\r\nOr B Then\r\nC = 0\r\nEnd If"),
-              Foo: """if (ns.get('A') || ns.get('B')) {
+              Foo: """if (ns.get('A').get() || ns.get('B').get()) {
                       ns.get('C').let(0);
                       }\n"""
 

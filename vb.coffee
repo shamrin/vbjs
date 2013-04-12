@@ -61,7 +61,8 @@ commonNodeValue = (n) ->
       if v?.type == 'CallExpression' \
             #and not isEqual(v.callee, identifier 'ns') \
             and not (v.callee.type == 'MemberExpression' \
-                     and isEqual(v.callee.property, identifier 'get'))
+                     and isEqual(v.callee.property, identifier 'get') \
+                     and v.arguments.length == 0)
         #console.log 'PRIMARY_EXPR', n.children[0].innerText(), v, 'YES'
         memberCall v, 'get'
       else
@@ -97,13 +98,14 @@ vbNodeValue = (n) ->
     when 'func_def'
       [_1, name, args, body] = n.children
 
-      # HACK traverse AST and replace all of `ns.get('arg')` with `arg`
+      # HACK traverse AST and replace all of `ns.get('arg').get()` with `arg`
       argnames = for a in args.value then a.name
       traverse = (obj) ->
         for k, v of obj when typeof v isnt 'string'
           found = no
           for argname in argnames
-            if isEqual v, memberCall identifier('ns'), 'get', literal argname
+            ns_get_arg = memberCall identifier('ns'), 'get', literal argname
+            if isEqual v, memberCall ns_get_arg, 'get'
               obj[k] = identifier argname
               found = yes
               break
