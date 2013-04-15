@@ -1,7 +1,19 @@
 {
-    "name" : "vb",
-    "version" : "0.1.0",
-    "description" : "Visual Basic parser and evaluator",
-    "main": "vb.coffee"
+  "name" : "vb",
+  "version" : "0.1.0",
+  "description" : "Visual Basic parser and evaluator",
+  "main": "vb.coffee",
+  "scripts": {
+    "install": "make"
+  },
+  "dependencies": {
+    "underscore": "1.4.2",
+    "language": "git://github.com/shamrin/language.git",
+    "escodegen": "0.0.14"
+  },
+  "devDependencies": {
+    "mocha": ">=1.6.0",
+    "doctestjs": ">=0.3.0",
+    "pegjs": "~0.7.0"
+  }
 }
-
