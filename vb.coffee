@@ -381,6 +381,15 @@ class VBObject
 # TODO use it to defer `.bang()` lookups too
 class Attribute
   constructor: (@object, @attr) ->
+    # Allow instances to be called, http://stackoverflow.com/a/12894270
+    # TODO explicit is better than implicit: compile VBA calls to `.call()`
+    callable = -> callable.call arguments...
+    for k, v of this
+      callable[k] = v
+    return callable
+
+  call: (args...) ->
+    @object.get(@attr)(args...)
 
   dot: (attr) ->
     @object.get(@attr).dot(attr)

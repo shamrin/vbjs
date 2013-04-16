@@ -4,6 +4,8 @@ if(! vb) {
     var vb = require("../vb");
 }
 
+// == SECTION VBObject basic
+
 var o = new vb.VBObject({type: 'TextBox',
                          attrs: {visible: true, value: 'foo'},
                          default: 'value'});
@@ -29,3 +31,24 @@ o.get('Bla');
 o.dot('Bla').let('bla');
 // => Error: VBRuntimeError: TextBox has no attribute 'Bla'
 
+
+// == SECTION VBObject call
+
+var ns = new vb.VBObject({type: 'Namespace',
+                          attrs: {
+                            DoCmd: new vb.VBObject({
+                              type: 'DoCmd',
+                              attrs: {
+                                OpenQuery: function (a, b) {
+                                  print ('OpenQuery(' + a + ', ' + b + ')');
+                                  return a;
+                                }
+                              }})}});
+
+print(ns.get('DoCmd').get('OpenQuery')('AAA', 'BBB'));
+// => OpenQuery(AAA, BBB)
+// => AAA
+
+print(ns.get('DoCmd').dot('OpenQuery')('AAA', 'BBB'));
+// => OpenQuery(AAA, BBB)
+// => AAA
