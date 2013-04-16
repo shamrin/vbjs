@@ -1,7 +1,8 @@
-// load CoffeeScript module to teach `require()` about `.coffee` modules
-try { require("coffee-script"); } catch (e) { }
-
-var vb = require("../vb");
+if(! vb) {
+    // load `vb.coffee` module when running under Node
+    require("coffee-script");
+    var vb = require("../vb");
+}
 
 var o = new vb.VBObject({type: 'TextBox',
                          attrs: {visible: true, value: 'foo'},

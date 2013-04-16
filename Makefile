@@ -16,6 +16,14 @@ test/%.peg.js: %.language common.language test/pegjs_build
 doctest:
 	$(DOCTEST) test/vbobject.js
 
+# run test/doctest.html in the browser
+doctest-browse: test/vb-browser.js FORCE
+	python -m webbrowser -t "http://localhost:8008/test/doctest.html"
+	python -m SimpleHTTPServer 8008
+
+test/vb-browser.js: vb.coffee *.parser.js
+	./node_modules/.bin/browserbuild -g vb -m vb -b node_modules/underscore/,node_modules/escodegen/ $^ node_modules/underscore/underscore.js node_modules/escodegen/escodegen.js > $@
+
 test: test/vb.peg.js vb.parser.js test/expr.peg.js expr.parser.js doctest
     # Usage:
     #     $ make test TEST="grep pattern"
@@ -25,4 +33,4 @@ test: test/vb.peg.js vb.parser.js test/expr.peg.js expr.parser.js doctest
 	env TESTING=1 $(MOCHA) test/*.coffee
     endif
 
-.PHONY: test doctest
+.PHONY: test doctest FORCE
