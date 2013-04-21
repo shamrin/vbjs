@@ -366,16 +366,13 @@ class VBObject
     new Attribute this, attr
 
   get: (attr = @default) ->
-    @attrs[@_lower attr]
-
-  let: (attr, value) ->
-    @attrs[@_lower attr] = value
-
-  _lower: (attr) ->
     lower = attr.toLowerCase()
     unless @attrs[lower]?
       throw new VBRuntimeError "#{@type} has no attribute '#{attr}'"
-    lower
+    @attrs[lower]
+
+  let: (attr, value) ->
+    @attrs[attr.toLowerCase()] = value
 
 # `Attribute` is used to defer `.dot(attr)` lookups in VBObject instances.
 # TODO use it to defer `.bang()` lookups too

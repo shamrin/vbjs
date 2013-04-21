@@ -29,7 +29,8 @@ o.get('Bla');
 // => Error: VBRuntimeError: TextBox has no attribute 'Bla'
 
 o.dot('Bla').let('bla');
-// => Error: VBRuntimeError: TextBox has no attribute 'Bla'
+print(o.get('Bla'));
+// => bla
 
 
 // == SECTION VBObject call
