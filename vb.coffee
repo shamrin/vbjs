@@ -404,7 +404,7 @@ class Attribute
     @object.let(@attr, value)
 
 module.exports = {compileModule, compileExpression, runModule, runExpression,
-                  VBObject, evaluate, VBRuntimeError}
+                  VBObject, runJS, VBRuntimeError}
 
 # Usage: cat VBA_module | coffee vb.coffee
 #        echo -n "[foo]&[bar]" | coffee vb.coffee -e

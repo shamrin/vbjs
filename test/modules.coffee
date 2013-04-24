@@ -1,5 +1,5 @@
 {isArray, isRegExp} = require 'underscore'
-{runModule, compileModule, evaluate, VBObject, VBRuntimeError} = require '../vb'
+{runModule, compileModule, runJS, VBObject, VBRuntimeError} = require '../vb'
 assert = require 'assert'
 
 # from https://gist.github.com/734620
@@ -37,7 +37,7 @@ run = (code, expected) ->
   module
 
 assert_js = (vba, expected_obj) ->
-  actual = evaluate compileModule vba
+  actual = runJS compileModule vba
   for fn, expected of expected_obj
     if isRegExp expected
       assert.ok actual[fn].toString().match(expected),
