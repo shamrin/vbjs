@@ -32,13 +32,14 @@ run = (code, expected) ->
                                 (args...) ->
                                   spec = (repr a for a in args).join ','
                                   log.push "#{name}(#{spec})"
-  module.Foo()
+  module.foo()
   assert.strictEqual log.join('\n'), expected
   module
 
 assert_js = (vba, expected_obj) ->
   actual = runJS compileModule vba
   for fn, expected of expected_obj
+    fn = fn.toLowerCase()
     if isRegExp expected
       assert.ok actual[fn].toString().match(expected),
                 "#{expected} doesn't match '#{actual[fn]}'"

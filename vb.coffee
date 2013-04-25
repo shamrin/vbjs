@@ -112,10 +112,11 @@ vbNodeValue = (n) ->
           traverse v unless found
       traverse body.value
 
+      # <name in lower case>: function (<args>...) { <body> }
       type: 'Property'
       key:
         type: 'Literal'
-        value: name.value
+        value: name.value.toLowerCase()
       value:
         type: 'FunctionExpression'
         id: null
