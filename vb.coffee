@@ -1,4 +1,4 @@
-{isEqual, isFunction, object} = require 'underscore'
+{isEqual, isFunction, object, pick} = require 'underscore'
 escodegen = require 'escodegen'
 
 vbParser = require './vb.parser'
@@ -383,6 +383,11 @@ class VBObject
 
   let: (attr, value) ->
     @attrs[attr.toLowerCase()] = value
+
+  # unwrap back the underlying object
+  unwrap: ->
+    # FIXME ineffecient? proper way: (multilevel?) callbacks in VBObject
+    object([key, pick(val, 'type', 'attrs', 'default')] for key, val of @attrs)
 
 # `Attribute` is used to defer `.dot(attr)` lookups in VBObject instances.
 # TODO use it to defer `.bang()` lookups too
