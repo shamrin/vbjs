@@ -138,8 +138,14 @@ vbNodeValue = (n) ->
     when 'single_line_statement', 'multiline_statement', 'statement'
       n.children[0].value
     when 'exit_statement'
+      # Generate `return ns.none;`. Why not `return;`? Because we generate
+      # the following code when *using* the function (`foo`): `foo().get()`.
       type: 'ReturnStatement'
-      argument: null
+      argument:
+        type: 'MemberExpression'
+        computed: no
+        object: identifier 'ns'
+        property: identifier 'none'
     when 'call_statement'
       type: 'ExpressionStatement'
       expression: call n.children[0].value, n.children[1].value
@@ -314,7 +320,10 @@ runModule = (code, ns) -> runJS compileModule(code), ns
 
 # run JavaScript from string `js` in {ns: ns} context
 # `ns` must be an object with `VBObject` interface
-runJS = (js, ns) -> evaluate js, ns: ns
+runJS = (js, ns = {}) ->
+  # add dummy VBObject to be used by our code generator above
+  ns.none ?= {get: ->}
+  evaluate js, ns: ns
 
 # better `eval`
 evaluate = (js, context) ->
