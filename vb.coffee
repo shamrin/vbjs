@@ -385,9 +385,9 @@ class VBObject
     @attrs[attr.toLowerCase()] = value
 
   # unwrap back the underlying object
-  unwrap: ->
+  unwrap: (attrs = @attrs) ->
     # FIXME ineffecient? proper way: (multilevel?) callbacks in VBObject
-    object([key, pick(val, 'type', 'attrs', 'default')] for key, val of @attrs)
+    object([a, pick(@attrs[a], 'type', 'attrs', 'default')] for a in attrs)
 
 # `Attribute` is used to defer `.dot(attr)` lookups in VBObject instances.
 # TODO use it to defer `.bang()` lookups too
